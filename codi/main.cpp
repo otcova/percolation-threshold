@@ -27,10 +27,12 @@ int main() {
   int option;
   cin >> option;
 
-  if (option == 0)
+  if (option == 1)
     generar_mostres();
-  else if (option == 1)
-    contar_components_connexes();
   else if (option == 2)
+    contar_components_connexes();
+  else if (option == 3)
     prova_exportar_dades();
+  else
+    main();
 }
