@@ -1,9 +1,11 @@
 #pragma once
+#include <string>
 #include <vector>
 using namespace std;
 
 class Graph {
 public:
+  Graph() {}
   Graph(int nodes);
 
   int number_of_nodes();
@@ -17,6 +19,7 @@ private:
   vector<vector<int>> connections;
 };
 
+Graph read_graph(const string &path);
 Graph new_random_geometric_grap(int nodes, float r);
 Graph new_triangular_graph(int width);
 Graph new_3d_grid_graph(int width);

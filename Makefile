@@ -17,6 +17,9 @@ build/%.o: codi/%.cpp
 	@mkdir -p $(dir $@)
 	g++ $(CPP_FLAGS) -MMD -o $@ -c $<
 
+generator:
+	python3 ./codi/graph/generador_grafos.py 
+
 clean:
 	rm -r ./build/
 

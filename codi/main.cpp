@@ -1,14 +1,36 @@
+#include "./graph/graph.h"
 #include "export/csv.h"
 #include <iostream>
 #include <math.h>
+#include <cstdlib>
 using namespace std;
 
-void generar_mostres() {
-  // TODO
+vector<Graph> conj_graph;
+
+
+void generar_graphs() {
+  cout << "generant graphs..." << endl;
+  system("python3 ./codi/graph/generador_grafos.py ");
+  cout << "done" << endl;
 }
 
-void contar_components_connexes() {
-  // TODO
+void cargar_graph_geometric()
+{
+  cout << "cargar graph..." << endl; 
+  // modificar per conj graphs
+  conj_graph.push_back(read_graph("./dades/random_graph.edgelist"));
+  cout << "done" << endl;
+}
+
+void cargar_graph_graelles()
+{
+  // modificar generar i cargar
+}
+
+void analisis() {
+  cout << "analitzant...: ";
+  // modificar per conj graphs i afegir percolacio
+  cout << conj_graph[0].count_connected_components() << endl;
 }
 
 void prova_exportar_dades() {
@@ -17,22 +39,39 @@ void prova_exportar_dades() {
     file << x << sin(x);
 }
 
-int main() {
+void menu() {
+  cout << u8"\033[2J\033[1;1H";
   cout << "-- Menu --" << endl;
-  cout << "1. Generar mostres" << endl;
-  cout << "2. Contar components connexes" << endl;
-  cout << "3. Prova: exportar dades" << endl;
+  cout << "0. Exit" << endl;
+  cout << "1. Generar graphs" << endl;
+  cout << "2. Cargar graphs geometrics" << endl;
+  cout << "3. Cargar graphs graelles" << endl;
+  cout << "4. Analisis" << endl;
+  cout << "5. Prova: exportar dades" << endl;
+  cout << ".. Clear" << endl;
+}
+
+int main() {
+  menu();
   cout << "> ";
 
   int option;
-  cin >> option;
+  while (cin >> option) {
 
-  if (option == 1)
-    generar_mostres();
-  else if (option == 2)
-    contar_components_connexes();
-  else if (option == 3)
-    prova_exportar_dades();
-  else
-    main();
+    if (option == 0)
+      break;
+    else if (option == 1)
+      generar_graphs();
+    else if (option == 2)
+      cargar_graph_geometric();
+    else if (option == 3)
+      cargar_graph_graelles();
+    else if (option == 4)
+      analisis();
+    else if (option == 5)
+      prova_exportar_dades();
+    else 
+      menu();
+    cout << "> ";
+  }
 }
