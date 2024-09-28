@@ -7,13 +7,6 @@ using namespace std;
 
 vector<Graph> conj_graph;
 
-
-void generar_graphs() {
-  cout << "generant graphs..." << endl;
-  system("python3 ./codi/graph/generador_grafos.py ");
-  cout << "done" << endl;
-}
-
 void cargar_graph_geometric()
 {
   cout << "cargar graph..." << endl; 
@@ -22,14 +15,24 @@ void cargar_graph_geometric()
   cout << "done" << endl;
 }
 
-void cargar_graph_graelles()
+void generar_graphs() {
+  cout << "generant graphs..." << endl;
+  system("python3 ./codi/graph/generador_grafos.py ");
+  cout << "done" << endl;
+  cargar_graph_geometric();
+}
+
+
+void genera_carga_graph_graelles()
 {
   // modificar generar i cargar
+  // xiangfeng
 }
 
 void analisis() {
   cout << "analitzant...: ";
   // modificar per conj graphs i afegir percolacio
+  // xavier
   cout << conj_graph[0].count_connected_components() << endl;
 }
 
@@ -45,7 +48,7 @@ void menu() {
   cout << "0. Exit" << endl;
   cout << "1. Generar graphs" << endl;
   cout << "2. Cargar graphs geometrics" << endl;
-  cout << "3. Cargar graphs graelles" << endl;
+  cout << "3. Genera i carga graphs graelles" << endl;
   cout << "4. Analisis" << endl;
   cout << "5. Prova: exportar dades" << endl;
   cout << ".. Clear" << endl;
@@ -65,7 +68,7 @@ int main() {
     else if (option == 2)
       cargar_graph_geometric();
     else if (option == 3)
-      cargar_graph_graelles();
+      genera_carga_graph_graelles();
     else if (option == 4)
       analisis();
     else if (option == 5)
