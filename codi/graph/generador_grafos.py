@@ -1,32 +1,30 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def generar_grafo():
-    num_vertices = 50
-    probabilidad = 0.2
-
-    G = nx.erdos_renyi_graph(num_vertices, probabilidad)
+def generar_grafo(tipus, num_vertices, prob_radio):
+    if tipus == "r":  #random
+        G = nx.erdos_renyi_graph(num_vertices, prob_radio)
+    if tipus == "rg":  #random geometric
+        G = nx.random_geometric_graph(num_vertices, prob_radio)
+    
     nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
-    plt.title("Grafo Aleatorio - Modelo Erdős-Rényi")
     plt.show()
     nx.write_edgelist(G, "random_graph.edgelist", data=False)
-    adj_matrix = nx.to_numpy_array(G, dtype=int)
-
-    with open("grafos.txt", "a") as f:
-        f.write("Matriz de adyacencia del grafo:\n")
-        for row in adj_matrix:
-            f.write(" ".join(map(str, row)) + "\n")
-        f.write("--------------------\n")
-        f.write("\n")
-        f.write("\n")
 	    
 def main():
     while True:
-        generar_grafo()
-        user_input = input("Presionar la tecla 'a' para generar un grafo nuevo")
-        if user_input.lower() != 'a':
-            break
-
+        user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r)[0, 1]:")
+        
+        try:
+                tipus, num_vertices, prob_radio = user_input.split()    
+                num_vertices = int(num_vertices)
+                prob_radio = float(prob_radio)    
+        except ValueError:
+                print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
+                continue        
+            
+        generar_grafo(tipus, num_vertices, prob_radio)
+            
 if __name__ == "__main__":
     main()
 
