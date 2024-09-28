@@ -36,6 +36,14 @@ void analisis() {
   cout << conj_graph[0].count_connected_components() << endl;
 }
 
+void clear_data()
+{
+  cout << "clearing data..." << endl;
+  conj_graph.clear();
+  cout << "done" << endl;
+
+}
+
 void prova_exportar_dades() {
   TableFile file("sine_wave", {"x", "sin(x)"});
   for (float x = 0; x < 30; x += 0.05)
@@ -51,7 +59,8 @@ void menu() {
   cout << "3. Genera i carga graphs graelles" << endl;
   cout << "4. Analisis" << endl;
   cout << "5. Prova: exportar dades" << endl;
-  cout << ".. Clear" << endl;
+  cout << "6. Clear data" << endl;
+  cout << ".. Clear screen" << endl;
 }
 
 int main() {
@@ -73,6 +82,8 @@ int main() {
       analisis();
     else if (option == 5)
       prova_exportar_dades();
+    else if (option == 6)
+      clear_data();
     else 
       menu();
     cout << "> ";
