@@ -10,9 +10,11 @@ public:
 
   int number_of_nodes();
   void add_edge(int node_a, int node_b);
+  void print_graph();
 
   int count_connected_components();
-
+  vector<int> adjacent_nodes(int node);
+  void write_graph(const string &path);
 private:
   // Graph represented with an adjacency list.
   // connections[i] are the connected nodes to the node i

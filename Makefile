@@ -20,6 +20,9 @@ build/%.o: codi/%.cpp
 generator:
 	python3 ./codi/graph/generador_grafos.py 
 
+visualizador:
+	python3 ./codi/graph/visualizador.py 
+
 clean:
 	rm -r ./build/
 

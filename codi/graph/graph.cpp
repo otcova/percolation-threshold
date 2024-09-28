@@ -8,6 +8,11 @@ Graph::Graph(int nodes) : connections(nodes) {}
 
 int Graph::number_of_nodes() { return connections.size(); }
 
+vector<int> Graph::adjacent_nodes(int node)
+{
+  return connections[node];
+}
+
 void Graph::add_edge(int node_a, int node_b) {
   int node_max = max(node_a, node_b);
   while (number_of_nodes() <= node_max)
@@ -15,6 +20,16 @@ void Graph::add_edge(int node_a, int node_b) {
 
   connections[node_a].push_back(node_b);
   connections[node_b].push_back(node_a);
+}
+
+void Graph::print_graph()
+{
+  for (int u = 0; u < number_of_nodes(); ++u)
+  {
+    cout << u;
+    for (int v : connections[u]) cout << " " << v;
+    cout << endl;
+  }
 }
 
 int Graph::count_connected_components() {
@@ -51,4 +66,21 @@ Graph read_graph(const string &path) {
   
 
   return graph;
+}
+
+void Graph::write_graph(const string &path) {
+  ofstream file(path);
+  for (int u = 0; u < number_of_nodes(); ++u)
+  {
+    for (int v : connections[u])
+    {
+      if (u < v) 
+      {
+        string edge_txt = to_string(u) + " " + to_string(v) + "\n";
+        file << edge_txt;
+      }
+    }
+  }
+
+  file.close();
 }

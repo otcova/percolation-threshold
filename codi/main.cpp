@@ -1,4 +1,5 @@
 #include "./graph/graph.h"
+#include "./percolation/percolation.h"
 #include "export/csv.h"
 #include <iostream>
 #include <math.h>
@@ -30,10 +31,15 @@ void genera_carga_graph_graelles()
 }
 
 void analisis() {
-  cout << "analitzant...: ";
+  cout << "analitzant...: " << endl;
   // modificar per conj graphs i afegir percolacio
   // xavier
-  cout << conj_graph[0].count_connected_components() << endl;
+  Graph new_graph = node_percolation(conj_graph[0],0.7);
+  new_graph.write_graph("./dades/prueba.edgelist");
+  cout << "done" << endl;
+  //Graph new_graph = edge_percolation(conj_graph[0],0.7);
+  //cout << "old comp conn ant: " << conj_graph[0].count_connected_components() << endl;
+  //cout << "new comp conn ant: " << new_graph.count_connected_components() << endl;
 }
 
 void clear_data()
