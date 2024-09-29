@@ -26,5 +26,8 @@ visualizador:
 clean:
 	rm -r ./build/
 
+ultraclean:
+	rm -r ./build/ ./dades/geometric/* ./dades/graelles/* ./dades/random/*
+
 -include $(OBJECTS:.o=.d)
 
