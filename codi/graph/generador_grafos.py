@@ -5,12 +5,13 @@ import matplotlib
 def generar_grafo(tipus, num_vertices, prob_radio):
     if tipus == "r":  #random
         G = nx.erdos_renyi_graph(num_vertices, prob_radio)
+        nx.write_edgelist(G, "./dades/random/graph.edgelist", data=False)
     if tipus == "rg":  #random geometric
         G = nx.random_geometric_graph(num_vertices, prob_radio)
+        nx.write_edgelist(G, "./dades/geometric/graph.edgelist", data=False)
     
     nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
     #plt.show()
-    nx.write_edgelist(G, "./dades/random_graph.edgelist", data=False)
 	    
 def main():
     while True:

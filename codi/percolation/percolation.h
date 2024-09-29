@@ -1,7 +1,7 @@
 #pragma once
 #include "../graph/graph.h"
-#include <map>
 #include <iostream>
+#include <map>
 
 // Creates a new graph with some deleted nodes.
 // q: probability of a node to be conserved

@@ -8,13 +8,14 @@ public:
   Graph() {}
   Graph(int nodes);
 
-  int number_of_nodes();
+  int number_of_nodes() const;
   void add_edge(int node_a, int node_b);
-  void print_graph();
+  void print_graph() const;
 
-  int count_connected_components();
-  vector<int> adjacent_nodes(int node);
-  void write_graph(const string &path);
+  int count_connected_components() const;
+  vector<int> adjacent_nodes(int node) const;
+  void export_graph(const string &path) const;
+
 private:
   // Graph represented with an adjacency list.
   // connections[i] are the connected nodes to the node i
