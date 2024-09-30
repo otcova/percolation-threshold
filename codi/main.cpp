@@ -83,7 +83,6 @@ void genera_graelles_graph() {
     for (int i = 0; i < n - 1; ++i)
       graph.add_edge(n * i + j, n * (i + 1) + j);
   }
-  graph.export_graph("./dades/graelles/graph.edgelist");
   cout << "done" << endl;
   cargar_graph("graelles");
 }
