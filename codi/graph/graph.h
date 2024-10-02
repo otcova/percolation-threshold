@@ -13,6 +13,7 @@ public:
   void print_graph() const;
 
   int count_connected_components() const;
+  bool is_connex() const;
   vector<int> adjacent_nodes(int node) const;
   void export_graph(const string &path) const;
 

@@ -27,7 +27,7 @@ clean:
 	rm -r ./build/
 
 ultraclean:
-	rm -r ./build/ ./dades/geometric/* ./dades/graelles/* ./dades/random/*
+	rm -r ./build/ ./dades
 
 -include $(OBJECTS:.o=.d)
 
