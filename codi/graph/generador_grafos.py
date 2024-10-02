@@ -19,20 +19,22 @@ def generar_grafo(tipus, num_vertices, prob_radio, i):
 	    
 def main():
     
-    user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]):")
-        
-    try:
+    while (True):
+        try:
+            user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]):")
             tipus, num_vertices, prob_radio = user_input.split()    
             num_vertices = int(num_vertices)
-            prob_radio = float(prob_radio)    
-    except ValueError:
+            prob_radio = float(prob_radio)
+            break    
+        except ValueError:
             print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
-    
-    n_gen = input("Introduce el nombre a generar:")
-    try:
-        n_gen = int(n_gen)
-    except ValueError:
-        print("Entrada no válida. Formato entero")
+    while (True):
+        try:
+            n_gen = input("Introduce el nombre a generar:")
+            n_gen = int(n_gen)
+            break
+        except ValueError:
+            print("Entrada no válida. Formato entero")
 
     if not os.path.exists("./dades"):
         os.makedirs("./dades")
