@@ -25,11 +25,11 @@ void menu() {
 
 void print_error(const string &text) {
   menu();
+  cout << endl;
   cout << text << endl;
 }
 
-void short_cut(string& tipus)
-{
+void short_cut(string &tipus) {
   if (tipus == "gra")
     tipus = "graelles";
   else if (tipus == "geo")
@@ -44,7 +44,7 @@ void cargar_graph(const string &tipus) {
     conj_graph.push_back(read_graph("./dades/" + tipus + "/graph.edgelist"));
     cout << "done" << endl;
   } else
-    print_error("error al cargar");
+    print_error("error format cargar");
   // modificar per conj graphs
 }
 
@@ -99,10 +99,14 @@ void generar_graphs() {
   else if (tipus == "rand")
     generar_geometric_graphs();
   else
-    print_error("error al generar");
+    print_error("error format generar");
 }
 
 void analisis() {
+  if (conj_graph.empty()) {
+    print_error("error conjunt buit");
+    return;
+  }
   cout << "Introduce tipus de graf[gra, geo, rand] a analitzar: ";
   string tipus;
   cin >> tipus;
@@ -112,8 +116,9 @@ void analisis() {
     Graph new_graph = node_percolation(conj_graph[0], 0.7);
     new_graph.export_graph("./dades/" + tipus + "/graph_percolat.edgelist");
     cout << "done" << endl;
+
   } else
-    print_error("error al analitzar");
+    print_error("error format analitzar");
   // modificar per conj graphs i afegir percolacio
   // xavier
   // Graph new_graph = edge_percolation(conj_graph[0],0.7);

@@ -2,9 +2,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import os
 
-if not os.path.exists("./dades"):
-    os.makedirs("./dades")
-
 def generar_grafo(tipus, num_vertices, prob_radio, i):
     if tipus == "r":  #random
         if not os.path.exists("./dades/random"):
@@ -19,11 +16,10 @@ def generar_grafo(tipus, num_vertices, prob_radio, i):
     
     #nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
     #plt.show()
-    
 	    
 def main():
     
-    user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r)[0, 1]:")
+    user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]):")
         
     try:
             tipus, num_vertices, prob_radio = user_input.split()    
@@ -31,8 +27,17 @@ def main():
             prob_radio = float(prob_radio)    
     except ValueError:
             print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
-                   
-    for i in range(0, 10):    
+    
+    n_gen = input("Introduce el nombre a generar:")
+    try:
+        n_gen = int(n_gen)
+    except ValueError:
+        print("Entrada no válida. Formato entero")
+
+    if not os.path.exists("./dades"):
+        os.makedirs("./dades")
+
+    for i in range(0, n_gen):    
         generar_grafo(tipus, num_vertices, prob_radio, i)
             
 if __name__ == "__main__":
