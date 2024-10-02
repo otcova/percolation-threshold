@@ -3,12 +3,15 @@
 #include "export/csv.h"
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <math.h>
 using namespace std;
 
-vector<Graph> conj_graph;
-const vector<string> vtipus = {"graelles", "geometric", "random"};
+string tipus_conj_global;
+vector<Graph> conj_graph_global;
+const vector<string> vtipus = {"graelles", "geometric", "triangular", "random"};
+const vector<string> v_no_cargar = {"graelles", "triangular"};
 
 void menu() {
   cout << u8"\033[2J\033[1;1H";
@@ -29,31 +32,80 @@ void print_error(const string &text) {
   cout << text << endl;
 }
 
+void clear_data() {
+  cout << "clearing data..." << endl;
+  conj_graph_global.clear();
+  cout << "done" << endl;
+}
+
 void short_cut(string &tipus) {
   if (tipus == "gra")
     tipus = "graelles";
   else if (tipus == "geo")
     tipus = "geometric";
+  else if (tipus == "tri")
+    tipus = "triangular";
   else if (tipus == "rand")
     tipus = "random";
 }
 
+int count_file(const string &path) {
+  int fileCount = 0;
+  if (filesystem::exists(path)) {
+    for (const auto &entry : filesystem::directory_iterator(path)) {
+      if (entry.is_regular_file())
+        ++fileCount;
+    }
+  }
+  return fileCount;
+}
+
+bool ask(const string &msg, const string& tipus) {
+  if (tipus_conj_global.empty() || tipus == tipus_conj_global)
+    return true;
+  cout << "Conjunt cargat amb graphs " << tipus_conj_global << endl;
+  cout << msg << " [yes/no]: ";
+  string ok;
+  cin >> ok;
+  return (ok == "yes");
+}
+
+void cargar_tipus(const string &tipus, const Graph &graph) {
+  if (tipus != tipus_conj_global && not tipus_conj_global.empty())
+    clear_data();
+  tipus_conj_global = tipus;
+  conj_graph_global.push_back(graph);
+}
+
 void cargar_graph(const string &tipus) {
   if (find(vtipus.begin(), vtipus.end(), tipus) != vtipus.end()) {
-    cout << "cargant graphs..." << endl;
-    conj_graph.push_back(read_graph("./dades/" + tipus + "/graph.edgelist"));
-    cout << "done" << endl;
+    if (ask("Estas segur de sustituir amb graph de tipus " + tipus, tipus)) {
+      string directoryPath = "./dades/" + tipus + "/original";
+      int fileCount = count_file(directoryPath);
+      if (fileCount == 0)
+        print_error("No hay ficheros");
+      else {
+        cout << "cargant sempre 1 graf pero hi han " << fileCount << " graphs..." << endl; // sempra carga un graf
+        Graph graph = read_graph(directoryPath + "/graph0.edgelist"); // cargar el graf0
+        cargar_tipus(tipus, graph); // carga un graf
+        cout << "done" << endl;
+      }
+    } else
+      print_error("cancelat");
   } else
     print_error("error format cargar");
   // modificar per conj graphs
 }
 
 void cargar_graph() {
-  cout << "Introduce tipus de graf[gra, geo, rand] a cargar: ";
+  cout << "Introduce tipus de graf[geo, rand] a cargar: ";
   string tipus;
   cin >> tipus;
   short_cut(tipus);
-  cargar_graph(tipus);
+  if (find(v_no_cargar.begin(), v_no_cargar.end(), tipus) != v_no_cargar.end())
+    print_error("No es pot cargar aquest tipus");
+  else
+    cargar_graph(tipus);
   // modificar per conj graphs
 }
 
@@ -66,29 +118,66 @@ void generar_geometric_graphs() {
 
 void genera_graelles_graph() {
   // generar graelles graph n * n
-  cout << "Introduce n [0..5000] para un grafo graelles de n*n nodos: ";
+  if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
+    cout << "Introduce n para un grafo graelles de n*n nodos: ";
+    int n;
+    cin >> n;
+    cout << "generant graphs de " << n * n << " nodes..." << endl;
 
-  int n = 50;
-  cin >> n;
+    Graph graph(n * n);
+    // conectar horitzaontal
+    for (int i = 0; i < n; ++i) {
+      for (int j = 0; j < n - 1; ++j)
+        graph.add_edge(n * i + j, n * i + (j + 1));
+    }
+    // conectar vertical
+    for (int j = 0; j < n; ++j) {
+      for (int i = 0; i < n - 1; ++i)
+        graph.add_edge(n * i + j, n * (i + 1) + j);
+    }
+    cout << "done" << endl;
+    cout << "cargant " << 1 << " graphs..." << endl;
+    cargar_tipus("graelles", graph);
+    cout << "done" << endl;
+  } else
+    print_error("cancelat");
+}
 
-  cout << "generant graphs de " << n * n << " nodes..." << endl;
-  Graph graph(n * n);
-  // conectar horitzaontal
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n - 1; ++j)
-      graph.add_edge(n * i + j, n * i + (j + 1));
-  }
-  // conectar vertical
-  for (int j = 0; j < n; ++j) {
-    for (int i = 0; i < n - 1; ++i)
-      graph.add_edge(n * i + j, n * (i + 1) + j);
-  }
-  cout << "done" << endl;
-  cargar_graph("graelles");
+int get_height(int n) { return (1 + sqrt(1 + 8 * n)) / 2; }
+
+void genera_triangular_graph() {
+  if (ask("Estas segur de generar i cargar graph de triangulars", "triangular")) {
+    // generar graelles graph n * n
+    cout << "Introduce altura[1..] para un grafo triangular de h altura: ";
+    int alt;
+    cin >> alt;
+
+    int n = alt * (alt + 1) / 2;
+    cout << "generant graphs de " << n << " nodes..." << endl;
+    Graph graph(n);
+    // graf tiangular
+    // conectar amb dos fills
+    for (int i = 0; i < n - alt; ++i) {
+      int h = get_height(i);
+      graph.add_edge(i, i + h);
+      graph.add_edge(i, i + h + 1);
+    }
+    // conectar gemans
+    for (int i = 1; i < n - 1; ++i) {
+      i += (get_height(i) != get_height(i + 1));
+      graph.add_edge(i, i + 1);
+    }
+
+    cout << "done" << endl;
+    cout << "cargant " << 1 << " graphs..." << endl;
+    cargar_tipus("triangular", graph);
+    cout << "done" << endl;
+  } else
+    print_error("cancelat");
 }
 
 void generar_graphs() {
-  cout << "Introduce tipus de graf[gra, geo, rand] a generar: ";
+  cout << "Introduce tipus de graf[gra, geo, tri, rand] a generar: ";
   string tipus;
   cin >> tipus;
 
@@ -96,6 +185,8 @@ void generar_graphs() {
     genera_graelles_graph();
   else if (tipus == "geo")
     generar_geometric_graphs();
+  else if (tipus == "tri")
+    genera_triangular_graph();
   else if (tipus == "rand")
     generar_geometric_graphs();
   else
@@ -103,34 +194,29 @@ void generar_graphs() {
 }
 
 void analisis() {
-  if (conj_graph.empty()) {
+  if (conj_graph_global.empty()) {
     print_error("error conjunt buit");
     return;
   }
-  cout << "Introduce tipus de graf[gra, geo, rand] a analitzar: ";
-  string tipus;
-  cin >> tipus;
-  short_cut(tipus);
-  if (find(vtipus.begin(), vtipus.end(), tipus) != vtipus.end()) {
-    cout << "analitzant...: " << endl;
-    Graph new_graph = node_percolation(conj_graph[0], 0.7);
-    new_graph.export_graph("./dades/" + tipus + "/graph_percolat.edgelist");
-    cout << "done" << endl;
+  if (ask("Estas segur de analitzar", "")) {
+    string directoryPath = "./dades/" + tipus_conj_global;
+    cout << "analitzant " << conj_graph_global.size() << " graphs...: " << endl;
+    Graph new_graph = node_percolation(conj_graph_global[0], 0.7);
 
+    filesystem::create_directory(directoryPath);
+    filesystem::create_directory(directoryPath + "/percolat");
+
+    new_graph.export_graph(directoryPath + "/percolat/graph.edgelist");
+    cout << "done" << endl;
   } else
-    print_error("error format analitzar");
+    print_error("cancelat");
   // modificar per conj graphs i afegir percolacio
   // xavier
   // Graph new_graph = edge_percolation(conj_graph[0],0.7);
-  // cout << "old comp conn ant: " << conj_graph[0].count_connected_components()
+  // cout << "old comp conn ant: " <<
+  // conj_graph[0].count_connected_components()
   // << endl; cout << "new comp conn ant: " <<
   // new_graph.count_connected_components() << endl;
-}
-
-void clear_data() {
-  cout << "clearing data..." << endl;
-  conj_graph.clear();
-  cout << "done" << endl;
 }
 
 void prova_exportar_dades() {
@@ -140,10 +226,16 @@ void prova_exportar_dades() {
 }
 
 void print_conj_graph() {
-  cout << "Printeant nombre de nodes graphs cargats..." << endl;
-  for (const Graph &graph : conj_graph)
+  cout << "Printeant el nombre de nodes de " << conj_graph_global.size() << " graphs "
+       << tipus_conj_global << " cargats..." << endl;
+  for (const Graph &graph : conj_graph_global)
+  {
     cout << graph.number_of_nodes() << " ";
-  cout << (conj_graph.empty() ? "nothing here" : "") << endl;
+    if (graph.number_of_nodes() < 10)
+      graph.print_graph();
+  }
+  
+  cout << (conj_graph_global.empty() ? "nothing here" : "") << endl;
   cout << "done" << endl;
 }
 
