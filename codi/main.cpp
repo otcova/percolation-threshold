@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <math.h>
+#include <fstream>
 using namespace std;
 
 vector<Graph> conj_graph;
@@ -41,7 +42,27 @@ void short_cut(string& tipus)
 void cargar_graph(const string &tipus) {
   if (find(vtipus.begin(), vtipus.end(), tipus) != vtipus.end()) {
     cout << "cargant graphs..." << endl;
-    conj_graph.push_back(read_graph("./dades/" + tipus + "/graph.edgelist"));
+    int start_i, end_i;
+    if (tipus == "geometric") { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 0..999
+      start_i = 0;
+      end_i = 1000;
+    }
+    else { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 1000..1999
+      start_i = 1000;
+      end_i = 2000;
+    } 
+    while (start_i < end_i)  {
+      std::ifstream archivo("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist");
+      if (archivo.good()) {  
+        conj_graph.push_back(read_graph("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist"));
+      }
+      else {
+        if (start_i == 0 || start_i == 1000) cout << "ended with file_num == -1" << endl;
+        else cout << "ended with file_num == " << start_i-1 << endl;
+        break;
+      }
+      ++start_i;
+    }
     cout << "done" << endl;
   } else
     print_error("error al cargar");
@@ -110,7 +131,29 @@ void analisis() {
   if (find(vtipus.begin(), vtipus.end(), tipus) != vtipus.end()) {
     cout << "analitzant...: " << endl;
     Graph new_graph = node_percolation(conj_graph[0], 0.7);
-    new_graph.export_graph("./dades/" + tipus + "/graph_percolat.edgelist");
+    //cout << "ini start_i" << endl;
+    int start_i, end_i;
+    if (tipus == "geometric") { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 0..999
+      start_i = 0;
+      end_i = 1000;
+    }
+    else { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 1000..1999
+      start_i = 1000;
+      end_i = 2000;
+    } 
+    //cout << "ini while" << endl;
+    while (start_i < end_i)  {
+      std::ifstream archivo("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist");
+      if (archivo.good()) { 
+        new_graph.export_graph("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist");
+      }
+      else {
+        if (start_i == 0 || start_i == 1000) cout << "ended with file_num == -1" << endl;
+        else cout << "ended with file_num == " << start_i-1 << endl;
+        break;
+      }
+      ++start_i;
+    }
     cout << "done" << endl;
   } else
     print_error("error al analitzar");
