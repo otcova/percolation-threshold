@@ -60,7 +60,7 @@ int count_file(const string &path) {
   return fileCount;
 }
 
-bool ask(const string &msg, const string& tipus) {
+bool ask(const string &msg, const string &tipus) {
   if (tipus_conj_global.empty() || tipus == tipus_conj_global)
     return true;
   cout << "Conjunt cargat amb graphs " << tipus_conj_global << endl;
@@ -68,6 +68,10 @@ bool ask(const string &msg, const string& tipus) {
   string ok;
   cin >> ok;
   return (ok == "yes");
+}
+
+bool is_connex(const string &path) {
+  return read_graph(path).count_connected_components() == 1;
 }
 
 void cargar_tipus(const string &tipus, const Graph &graph) {
@@ -85,9 +89,11 @@ void cargar_graph(const string &tipus) {
       if (fileCount == 0)
         print_error("No hay ficheros");
       else {
-        cout << "cargant sempre 1 graf pero hi han " << fileCount << " graphs..." << endl; // sempra carga un graf
-        Graph graph = read_graph(directoryPath + "/graph0.edgelist"); // cargar el graf0
-        cargar_tipus(tipus, graph); // carga un graf
+        cout << "cargant sempre 1 graf pero hi han " << fileCount
+             << " graphs..." << endl; // sempra carga un graf
+        Graph graph =
+            read_graph(directoryPath + "/graph0.edgelist"); // cargar el graf0
+        cargar_tipus(tipus, graph);                         // carga un graf
         cout << "done" << endl;
       }
     } else
@@ -146,7 +152,8 @@ void genera_graelles_graph() {
 int get_height(int n) { return (1 + sqrt(1 + 8 * n)) / 2; }
 
 void genera_triangular_graph() {
-  if (ask("Estas segur de generar i cargar graph de triangulars", "triangular")) {
+  if (ask("Estas segur de generar i cargar graph de triangulars",
+          "triangular")) {
     // generar graelles graph n * n
     cout << "Introduce altura[1..] para un grafo triangular de h altura: ";
     int alt;
@@ -201,15 +208,25 @@ void analisis() {
   if (ask("Estas segur de analitzar", "")) {
     string directoryPath = "./dades/" + tipus_conj_global;
     cout << "analitzant " << conj_graph_global.size() << " graphs...: " << endl;
-    Graph new_graph = node_percolation(conj_graph_global[0], 0.7);
+    float q = 0.7;
+    Graph new_graph = node_percolation(conj_graph_global[0], q);
 
     filesystem::create_directory(directoryPath);
     filesystem::create_directory(directoryPath + "/percolat");
-
     new_graph.export_graph(directoryPath + "/percolat/graph.edgelist");
+
+    // resultats
+    cout << "result with q = " << q << ":" << endl;
+    for (int i = 0; i < conj_graph_global.size(); ++i) {
+      int c1 = conj_graph_global[0].count_connected_components();
+      int c2 = new_graph.count_connected_components(); // cambiar a conjunt
+      cout << i << ": " << c1 << " -> " << c2 << endl;
+    }
+
     cout << "done" << endl;
   } else
     print_error("cancelat");
+
   // modificar per conj graphs i afegir percolacio
   // xavier
   // Graph new_graph = edge_percolation(conj_graph[0],0.7);
@@ -226,15 +243,14 @@ void prova_exportar_dades() {
 }
 
 void print_conj_graph() {
-  cout << "Printeant el nombre de nodes de " << conj_graph_global.size() << " graphs "
-       << tipus_conj_global << " cargats..." << endl;
-  for (const Graph &graph : conj_graph_global)
-  {
+  cout << "Printeant el nombre de nodes de " << conj_graph_global.size()
+       << " graphs " << tipus_conj_global << " cargats..." << endl;
+  for (const Graph &graph : conj_graph_global) {
     cout << graph.number_of_nodes() << " ";
     if (graph.number_of_nodes() < 10)
       graph.print_graph();
   }
-  
+
   cout << (conj_graph_global.empty() ? "nothing here" : "") << endl;
   cout << "done" << endl;
 }
