@@ -53,6 +53,12 @@ int Graph::count_connected_components() const {
   return connected_components;
 }
 
+bool is_connex() const
+{
+  return count_connected_components() == 1;
+}
+
+
 Graph read_graph(const string &path) {
   Graph graph;
   ifstream file(path);
