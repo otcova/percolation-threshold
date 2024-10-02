@@ -1,7 +1,13 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import os
 
-def generar_grafo(tipus, num_vertices, prob_radio):
+directorio = "../ej_grafos"
+
+if not os.path.exists(directorio):
+    os.makedirs(directorio)
+
+def generar_grafo(tipus, num_vertices, prob_radio, i):
     if tipus == "r":  #random
         G = nx.erdos_renyi_graph(num_vertices, prob_radio)
     if tipus == "rg":  #random geometric
@@ -9,7 +15,7 @@ def generar_grafo(tipus, num_vertices, prob_radio):
     
     nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
     plt.show()
-    nx.write_edgelist(G, "random_graph.edgelist", data=False)
+    nx.write_edgelist(G, os.path.join(directorio, f"random_graph.edgelist{i}"), data=False)
 	    
 def main():
     while True:
@@ -22,8 +28,8 @@ def main():
         except ValueError:
                 print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
                 continue        
-            
-        generar_grafo(tipus, num_vertices, prob_radio)
+        for i in range(1, 1001):    
+            generar_grafo(tipus, num_vertices, prob_radio, i)
             
 if __name__ == "__main__":
     main()
