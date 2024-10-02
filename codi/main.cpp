@@ -98,7 +98,7 @@ void cargar_graph(const string &tipus) {
           start_i = 0;
           end_i = 1000;
         }
-        else { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 1000..1999
+        else { // Els grafs randoms estan guardats als fitxers amb cardinalitat 1000..1999
           start_i = 1000;
           end_i = 2000;
         } 
