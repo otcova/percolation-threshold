@@ -1,6 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+
 import os
+
 
 directorio = "../ej_grafos"
 
