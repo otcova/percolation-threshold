@@ -171,13 +171,11 @@ void remove_no_connex(const string &path) {
 }
 
 void generar_geometric_graphs() {
-  ask_directory("geometric");
   cout << "generant graphs..." << endl;
-
   if (system("python3 ./codi/graph/generador_grafos.py ") < 0)
     perror("system");
   cout << "done" << endl;
-  cargar_graph("geometric");
+  cargar_graph("geometric"); // nomes per geometric
 }
 
 void genera_graelles_graph() {
