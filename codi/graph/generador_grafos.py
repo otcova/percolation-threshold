@@ -5,13 +5,9 @@ import re
 
 def generar_grafo(tipus, num_vertices, prob_radio, i):
     if tipus == "r":  #random
-        if not os.path.exists("./dades/random/original"):
-            os.makedirs("./dades/random/original")
         G = nx.erdos_renyi_graph(num_vertices, prob_radio)
         nx.write_edgelist(G, "./dades/random/original/graph"+ str(i)+".edgelist", data=False)
     if tipus == "rg":  #random geometric
-        if not os.path.exists("./dades/geometric/original"):
-            os.makedirs("./dades/geometric/original")
         G = nx.random_geometric_graph(num_vertices, prob_radio)
         nx.write_edgelist(G, "./dades/geometric/original/graph"+ str(i)+".edgelist", data=False)
     
@@ -42,7 +38,7 @@ def main():
     
     while (True):
         try:
-            user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]):")
+            user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]): ")
             tipus, num_vertices, prob_radio = user_input.split()    
             num_vertices = int(num_vertices)
             prob_radio = float(prob_radio)
@@ -52,7 +48,7 @@ def main():
     
     while (True):
         try:
-            n_gen = input("Introduce el nombre a generar:")
+            n_gen = input("Introduce el nombre a generar: ")
             n_gen = int(n_gen)
             break
         except ValueError:
@@ -62,10 +58,14 @@ def main():
         os.makedirs("./dades")
     
     if tipus == "rg":
+        if not os.path.exists("./dades/geometric/original"):
+            os.makedirs("./dades/geometric/original")
         ini = encontrar_max_numero("./dades/geometric/original", tipus)         
         for i in range(ini, ini+n_gen):    
             generar_grafo(tipus, num_vertices, prob_radio, i)
     else:
+        if not os.path.exists("./dades/random/original"):
+            os.makedirs("./dades/random/original")
         ini = encontrar_max_numero("./dades/random/original", tipus)  
         for i in range(ini, ini+n_gen):    
             generar_grafo(tipus, num_vertices, prob_radio, i)
