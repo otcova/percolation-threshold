@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <iostream>
 #include <math.h>
+#include <fstream>
 using namespace std;
 
 string tipus_conj_global;
@@ -105,7 +106,7 @@ bool is_connex(const string &path) {
 }
 
 void cargar_tipus(const string &tipus, const Graph &graph) {
-  if (tipus != tipus_conj_global && not tipus_conj_global.empty())
+  if (tipus != tipus_conj_global && !tipus_conj_global.empty())
     clear_data();
   tipus_conj_global = tipus;
   conj_graph_global.push_back(graph);
@@ -133,8 +134,7 @@ void cargar_graph(const string &tipus) {
         }
         cout << "done" << endl;
       }
-    } else
-      print_error("cancelat");
+    }
   } else
     print_error("error format cargar");
   // modificar per conj graphs

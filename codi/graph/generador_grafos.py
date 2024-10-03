@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import os
+import re
 
 def generar_grafo(tipus, num_vertices, prob_radio, i):
     if tipus == "r":  #random
@@ -16,6 +17,26 @@ def generar_grafo(tipus, num_vertices, prob_radio, i):
     
     #nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
     #plt.show()
+   
+def encontrar_max_numero(directorio, tipus):
+
+    patron = re.compile(r'graph(\d+)\.edgelist')
+    max_num = -1
+    
+    for archivo in os.listdir(directorio):
+        coincidencia = patron.match(archivo)
+        if coincidencia:
+            numero = int(coincidencia.group(1))
+            if numero > max_num:
+                max_num = numero
+    
+    if max_num != -1:
+        return max_num + 1
+    else:
+        if tipus == "rg":
+            return 0
+        else:
+            return 1000
 	    
 def main():
     
@@ -28,6 +49,7 @@ def main():
             break    
         except ValueError:
             print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
+    
     while (True):
         try:
             n_gen = input("Introduce el nombre a generar: ")
@@ -38,9 +60,15 @@ def main():
 
     if not os.path.exists("./dades"):
         os.makedirs("./dades")
-
-    for i in range(0, n_gen):    
-        generar_grafo(tipus, num_vertices, prob_radio, i)
+    
+    if tipus == "rg":
+        ini = encontrar_max_numero("./dades/geometric/original", tipus)         
+        for i in range(ini, ini+n_gen):    
+            generar_grafo(tipus, num_vertices, prob_radio, i)
+    else:
+        ini = encontrar_max_numero("./dades/random/original", tipus)  
+        for i in range(ini, ini+n_gen):    
+            generar_grafo(tipus, num_vertices, prob_radio, i)
             
 if __name__ == "__main__":
     main()

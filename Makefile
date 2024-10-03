@@ -1,12 +1,12 @@
-SOURCES := $(shell find codi/ -name "*.cpp")
+SOURCES := $(wildcard codi/*/*.cpp codi/*.cpp)
 OBJECTS := $(SOURCES:codi/%.cpp=build/%.o)
 
-CPP_FLAGS := -Wall -std=c++17 -O3
+CPP_FLAGS := -Wno-unused-result -std=c++17 -O3
 
 
-build: build/main.exe
+all: build/main.exe
 
-run: build
+run: all
 	./build/main.exe
 
 build/main.exe: $(OBJECTS)
