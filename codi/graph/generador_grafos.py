@@ -18,8 +18,8 @@ def generar_grafo(tipus, num_vertices, prob_radio, i):
                 break  
         nx.write_edgelist(G, "./dades/geometric/original/graph"+ str(i)+".edgelist", data=False)
     
-    nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
-    plt.show()
+    #nx.draw(G, with_labels=True, node_color="skyblue", node_size=700, font_size=10, font_color="black", font_weight="bold")
+    #plt.show()
    
 def calcular_radio_critico(num_vertices):
     # Fórmula del radio crítico para garantizar conexidad
