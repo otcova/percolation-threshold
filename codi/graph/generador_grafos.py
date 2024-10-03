@@ -21,7 +21,7 @@ def main():
     
     while (True):
         try:
-            user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]):")
+            user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]): ")
             tipus, num_vertices, prob_radio = user_input.split()    
             num_vertices = int(num_vertices)
             prob_radio = float(prob_radio)
@@ -30,7 +30,7 @@ def main():
             print("Entrada no válida. Usa el formato: r/rg num_vertices probabilidad/radio")
     while (True):
         try:
-            n_gen = input("Introduce el nombre a generar:")
+            n_gen = input("Introduce el nombre a generar: ")
             n_gen = int(n_gen)
             break
         except ValueError:
