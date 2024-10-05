@@ -25,6 +25,7 @@ void menu() {
   cout << " 3. Analisis [tipus] graphs" << endl;
   cout << " 4. Print graphs cargats" << endl;
   cout << " 5. Clear data" << endl;
+  cout << " 6. Clear file geometric"  << endl;
   cout << "... Clear screen" << endl;
 }
 
@@ -143,10 +144,7 @@ void cargar_graph() {
 
 void generar_geometric_graphs() {
   cout << "generant graphs..." << endl;
-  if (filesystem::remove_all("./dades/geometric/original"))
-    perror("remove_all");
-  if (filesystem::create_directories("./dades/geometric/original"))
-    perror("create_directories");
+
   system("python3 ./codi/graph/generador_grafos.py ");
   cout << "done" << endl;
   cargar_graph("geometric");
@@ -155,26 +153,25 @@ void generar_geometric_graphs() {
 void genera_graelles_graph() {
   // generar graelles graph n * n
   if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
-    cout << "Introduce n para un grafo graelles de n*n nodos: ";
-    int n;
-    cin >> n;
-    cout << "generant graphs de " << n * n << " nodes..." << endl;
+    for (int n : {10, 50, 100, 200}) {
+      cout << "generant graphs de " << n * n << " nodes..." << endl;
 
-    Graph graph(n * n);
-    // conectar horitzaontal
-    for (int i = 0; i < n; ++i) {
-      for (int j = 0; j < n - 1; ++j)
-        graph.add_edge(n * i + j, n * i + (j + 1));
+      Graph graph(n * n);
+      // conectar horitzaontal
+      for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n - 1; ++j)
+          graph.add_edge(n * i + j, n * i + (j + 1));
+      }
+      // conectar vertical
+      for (int j = 0; j < n; ++j) {
+        for (int i = 0; i < n - 1; ++i)
+          graph.add_edge(n * i + j, n * (i + 1) + j);
+      }
+      cout << "done" << endl;
+      cout << "cargant " << 1 << " graphs..." << endl;
+      cargar_tipus("graelles", graph);
+      cout << "done" << endl;
     }
-    // conectar vertical
-    for (int j = 0; j < n; ++j) {
-      for (int i = 0; i < n - 1; ++i)
-        graph.add_edge(n * i + j, n * (i + 1) + j);
-    }
-    cout << "done" << endl;
-    cout << "cargant " << 1 << " graphs..." << endl;
-    cargar_tipus("graelles", graph);
-    cout << "done" << endl;
   } else
     print_error("cancelat");
 }
@@ -332,7 +329,12 @@ int main() {
       print_conj_graph();
     else if (option == 5)
       clear_data();
-    else
+    else if (option == 6) {
+      if (filesystem::remove_all("./dades/geometric/original"))
+        perror("remove_all");
+      if (filesystem::create_directories("./dades/geometric/original"))
+        perror("create_directories");
+    } else
       menu();
     cout << "> ";
   }

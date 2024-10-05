@@ -6,7 +6,7 @@
 Graph node_percolation(const Graph &graph, float q) {
   std::random_device dev;
   std::mt19937 rng(dev());
-  std::uniform_int_distribution<std::mt19937::result_type> dist100(0, 100);
+  std::uniform_real_distribution<> dist100(0., 1.);
 
   int old_n_nodes = graph.number_of_nodes();
 
@@ -16,7 +16,7 @@ Graph node_percolation(const Graph &graph, float q) {
   // otherwise, it's the new_index of the node with old_index u
   int deleted_counter = 0;
   for (int u = 0; u < old_n_nodes; ++u) {
-    if (dist100(rng) / float(100) <= q) {
+    if (dist100(rng) <= q) {
       new_index[u] = u - deleted_counter;
       survivors.push_back(u);
     } else
