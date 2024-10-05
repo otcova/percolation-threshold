@@ -4,9 +4,9 @@
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <math.h>
-#include <fstream>
 using namespace std;
 
 string tipus_conj_global;
@@ -91,26 +91,31 @@ void cargar_graph(const string &tipus) {
       if (fileCount == 0)
         print_error("No hay ficheros");
       else {
-        cout << "cargant sempre 1 graf pero hi han " << fileCount
-             << " graphs..." << endl; // sempra carga un graf
+        cout << "cargant " << fileCount << " graphs..."
+             << endl; // sempra carga un graf
         int start_i, end_i;
-        if (tipus == "geometric") { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 0..999
+        if (tipus == "geometric") { // Els grafs geometrics estan guardats als
+                                    // fitxers amb cardinalitat 0..999
           start_i = 0;
           end_i = 1000;
-        }
-        else { // Els grafs randoms estan guardats als fitxers amb cardinalitat 1000..1999
+        } else { // Els grafs randoms estan guardats als fitxers amb
+                 // cardinalitat 1000..1999
           start_i = 1000;
           end_i = 2000;
-        } 
-        while (start_i < end_i)  {
-          std::ifstream archivo("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist");
-          if (archivo.good()) {  
-            Graph graph = read_graph("./dades/" + tipus + "/original/graph" + std::to_string(start_i) +".edgelist"); // cargar el graf0
-            cargar_tipus(tipus, graph);                         // carga un graf
-          }
-          else {
-            if (start_i == 0 || start_i == 1000) cout << "ended with file_num == -1" << endl;
-            else cout << "ended with file_num == " << start_i-1 << endl;
+        }
+        while (start_i < end_i) {
+          ifstream archivo("./dades/" + tipus + "/graph" + to_string(start_i) +
+                           ".edgelist");
+          if (archivo.good()) {
+            Graph graph =
+                read_graph("./dades/" + tipus + "/original/graph" +
+                           to_string(start_i) + ".edgelist"); // cargar el graf0
+            cargar_tipus(tipus, graph);                       // carga un graf
+          } else {
+            if (start_i == 0 || start_i == 1000)
+              cout << "ended with file_num == -1" << endl;
+            else
+              cout << "ended with file_num == " << start_i - 1 << endl;
             break;
           }
           ++start_i;
