@@ -77,7 +77,7 @@ bool is_connex(const string &path) {
 }
 
 void cargar_tipus(const string &tipus, const Graph &graph) {
-  if (tipus != tipus_conj_global && !tipus_conj_global.empty())
+  //if (tipus != tipus_conj_global && !tipus_conj_global.empty())
     clear_data();
   tipus_conj_global = tipus;
   conj_graph_global.push_back(graph);
@@ -92,8 +92,8 @@ void cargar_graph(const string &tipus) {
       if (fileCount == 0)
         print_error("No hay ficheros");
       else {
-        cout << "cargant sempre 1 graf pero hi han " << fileCount
-             << " graphs..." << endl; // sempra carga un graf
+        cout << "cargant " << fileCount << " graphs..."
+             << endl; // sempra carga un graf
         int start_i, end_i;
         if (tipus == "geometric") { // Els grafs geometrics estan guardats als
                                     // fitxers amb cardinalitat 0..999
@@ -105,13 +105,13 @@ void cargar_graph(const string &tipus) {
           end_i = 2000;
         }
         while (start_i < end_i) {
-          std::ifstream archivo("./dades/" + tipus + "/graph" +
-                                std::to_string(start_i) + ".edgelist");
+          ifstream archivo("./dades/" + tipus + "/original/graph" +
+                           to_string(start_i) + ".edgelist");
           if (archivo.good()) {
-            Graph graph = read_graph("./dades/" + tipus + "/original/graph" +
-                                     std::to_string(start_i) +
-                                     ".edgelist"); // cargar el graf0
-            cargar_tipus(tipus, graph);            // carga un graf
+            Graph graph =
+                read_graph("./dades/" + tipus + "/original/graph" +
+                           to_string(start_i) + ".edgelist"); // cargar el graf0
+            cargar_tipus(tipus, graph);                       // carga un graf
           } else {
             if (start_i == 0 || start_i == 1000)
               cout << "ended with file_num == -1" << endl;
@@ -242,7 +242,7 @@ void analisis() {
   const string file_path =
       "./dades/percolat/" + tipus_conj_global + "_" + percolation_type + ".csv";
 
-  if (std::filesystem::exists(file_path)) {
+  if (filesystem::exists(file_path)) {
     if (!confirm_action("Aquesta operacio sobrescriura " + file_path +
                         ". Vols continuar?")) {
       cout << "Operacio cancelada" << endl;
