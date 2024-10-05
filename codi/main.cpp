@@ -265,8 +265,10 @@ void analisis() {
   cout << "Calculant " << total_samples << " graphs percolats" << endl;
 
   vector<string> columns_titles = {"q"};
-  for (int i = 0; i < conj_graph_global.size(); ++i)
-    columns_titles.push_back("p_graph_" + to_string(i));
+  for (int i = 0; i < conj_graph_global.size(); ++i) {
+    int nodes = conj_graph_global[i].number_of_nodes();
+    columns_titles.push_back("p" + to_string(i) + "_n" + to_string(nodes));
+  }
   columns_titles.push_back("p_mean");
   TableFile file(file_path, columns_titles);
 
