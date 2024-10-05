@@ -143,6 +143,10 @@ void cargar_graph() {
 
 void generar_geometric_graphs() {
   cout << "generant graphs..." << endl;
+  if (filesystem::remove_all("./dades/geometric/original"))
+    perror("remove_all");
+  if (filesystem::create_directories("./dades/geometric/original"))
+    perror("create_directories");
   system("python3 ./codi/graph/generador_grafos.py ");
   cout << "done" << endl;
   cargar_graph("geometric");
@@ -234,6 +238,9 @@ void analisis() {
     cout << "Operacio cancelada" << endl;
     return;
   }
+  for (const Graph &g : conj_graph_global)
+    if (not g.is_connex())
+      cout << "graf a percolat no es connex" << endl;
 
   string percolation_type =
       choose_option("Tipus de percolacio", {"nodes", "arestes"});
@@ -252,7 +259,7 @@ void analisis() {
 
   int q_samples =
       read_value<int>("Quantitat de valors de q a analitzar (50)", 50);
-  int samples = read_value<int>("Percolacions per cada graph i q (50)", 50);
+  int samples = read_value<int>("Percolacions per cada graph i q (200)", 200);
 
   int total_samples = samples * q_samples * conj_graph_global.size();
   cout << "Calculant " << total_samples << " graphs percolats" << endl;
