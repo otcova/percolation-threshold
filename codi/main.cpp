@@ -239,8 +239,13 @@ void analisis() {
       choose_option("Tipus de percolacio", {"nodes", "arestes"});
   bool node_percolation = percolation_type == "nodes";
 
-  const string file_path =
-      "./dades/percolat/" + tipus_conj_global + "_" + percolation_type + ".csv";
+  bool mean_all_graphs = confirm_action("Fer mitjana de tots els graphs");
+
+  string file_path = "./dades/percolat/";
+  file_path += tipus_conj_global + "_";
+  if (mean_all_graphs)
+    file_path += "mean_";
+  file_path += percolation_type + ".csv";
 
   if (filesystem::exists(file_path)) {
     if (!confirm_action("Aquesta operacio sobrescriura " + file_path +
@@ -257,19 +262,44 @@ void analisis() {
   int total_samples = samples * q_samples * conj_graph_global.size();
   cout << "Calculant " << total_samples << " graphs percolats" << endl;
 
-  TableFile file(file_path, {"q", "p", "graph", "nodes"});
+  if (mean_all_graphs) {
+    TableFile file(file_path, {"q", "p"});
 
-  for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
-    float q = float(q_sample_index) / float(q_samples - 1);
+    for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
+      float q = float(q_sample_index) / float(q_samples - 1);
+      float mean_p = 0.;
 
-    for (int i = 0; i < conj_graph_global.size(); ++i) {
-      const Graph &graph = conj_graph_global[i];
-      float p;
-      if (node_percolation)
-        p = node_percolation_probability(graph, q, samples);
-      else
-        p = edge_percolation_probability(graph, q, samples);
-      file << q << p << i << graph.number_of_nodes();
+      for (int i = 0; i < conj_graph_global.size(); ++i) {
+        const Graph &graph = conj_graph_global[i];
+        float p;
+        if (node_percolation)
+          p = node_percolation_probability(graph, q, samples);
+        else
+          p = edge_percolation_probability(graph, q, samples);
+
+        mean_p += p / float(conj_graph_global.size());
+      }
+      file << q << mean_p;
+    }
+  } else {
+    vector<string> columns_titles = {"q"};
+    for (int i = 0; i < conj_graph_global.size(); ++i)
+      columns_titles.push_back("p_graph_" + to_string(i));
+    TableFile file(file_path, columns_titles);
+
+    for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
+      float q = float(q_sample_index) / float(q_samples - 1);
+      file << q;
+
+      for (int i = 0; i < conj_graph_global.size(); ++i) {
+        const Graph &graph = conj_graph_global[i];
+        float p;
+        if (node_percolation)
+          p = node_percolation_probability(graph, q, samples);
+        else
+          p = edge_percolation_probability(graph, q, samples);
+        file << p;
+      }
     }
   }
 }
