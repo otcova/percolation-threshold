@@ -77,7 +77,7 @@ bool is_connex(const string &path) {
 }
 
 void cargar_tipus(const string &tipus, const Graph &graph) {
-  //if (tipus != tipus_conj_global && !tipus_conj_global.empty())
+  if (tipus != tipus_conj_global && !tipus_conj_global.empty())
     clear_data();
   tipus_conj_global = tipus;
   conj_graph_global.push_back(graph);
