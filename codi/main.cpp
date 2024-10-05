@@ -1,12 +1,13 @@
-#include "./graph/graph.h"
-#include "./percolation/percolation.h"
+#include "cli_utils.h"
 #include "export/csv.h"
+#include "graph/graph.h"
+#include "percolation/percolation.h"
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <math.h>
-#include <fstream>
 using namespace std;
 
 string tipus_conj_global;
@@ -94,23 +95,28 @@ void cargar_graph(const string &tipus) {
         cout << "cargant sempre 1 graf pero hi han " << fileCount
              << " graphs..." << endl; // sempra carga un graf
         int start_i, end_i;
-        if (tipus == "geometric") { // Els grafs geometrics estan guardats als fitxers amb cardinalitat 0..999
+        if (tipus == "geometric") { // Els grafs geometrics estan guardats als
+                                    // fitxers amb cardinalitat 0..999
           start_i = 0;
           end_i = 1000;
-        }
-        else { // Els grafs randoms estan guardats als fitxers amb cardinalitat 1000..1999
+        } else { // Els grafs randoms estan guardats als fitxers amb
+                 // cardinalitat 1000..1999
           start_i = 1000;
           end_i = 2000;
-        } 
-        while (start_i < end_i)  {
-          std::ifstream archivo("./dades/" + tipus + "/graph" + std::to_string(start_i) +".edgelist");
-          if (archivo.good()) {  
-            Graph graph = read_graph("./dades/" + tipus + "/original/graph" + std::to_string(start_i) +".edgelist"); // cargar el graf0
-            cargar_tipus(tipus, graph);                         // carga un graf
-          }
-          else {
-            if (start_i == 0 || start_i == 1000) cout << "ended with file_num == -1" << endl;
-            else cout << "ended with file_num == " << start_i-1 << endl;
+        }
+        while (start_i < end_i) {
+          std::ifstream archivo("./dades/" + tipus + "/graph" +
+                                std::to_string(start_i) + ".edgelist");
+          if (archivo.good()) {
+            Graph graph = read_graph("./dades/" + tipus + "/original/graph" +
+                                     std::to_string(start_i) +
+                                     ".edgelist"); // cargar el graf0
+            cargar_tipus(tipus, graph);            // carga un graf
+          } else {
+            if (start_i == 0 || start_i == 1000)
+              cout << "ended with file_num == -1" << endl;
+            else
+              cout << "ended with file_num == " << start_i - 1 << endl;
             break;
           }
           ++start_i;
@@ -169,7 +175,9 @@ void genera_graelles_graph() {
     print_error("cancelat");
 }
 
-int get_height(int n) { return (1 + sqrt(1 + 8 * n)) / 2; }
+int get_height(int n) {
+  return (1 + sqrt(1 + 8 * n)) / 2;
+}
 
 void genera_triangular_graph() {
   if (ask("Estas segur de generar i cargar graph de triangulars",
@@ -222,42 +230,52 @@ void generar_graphs() {
 
 void analisis() {
   if (conj_graph_global.empty()) {
-    print_error("error conjunt buit");
+    cout << "No hi han graphs carregats" << endl;
+    cout << "Operacio cancelada" << endl;
     return;
   }
-  if (ask("Estas segur de analitzar", "")) {
-    string directoryPath = "./dades/" + tipus_conj_global;
-    cout << "analitzant " << conj_graph_global.size() << " graphs...: " << endl;
-    float q = 0.7;
-    Graph new_graph = node_percolation(conj_graph_global[0], q);
 
-    filesystem::create_directory(directoryPath);
-    filesystem::create_directory(directoryPath + "/percolat");
-    new_graph.export_graph(directoryPath + "/percolat/graph.edgelist");
+  string percolation_type =
+      choose_option("Tipus de percolacio", {"nodes", "arestes"});
+  bool node_percolation = percolation_type == "nodes";
 
-    // resultats
-    cout << "result with q = " << q << ":" << endl;
-    for (int i = 0; i < conj_graph_global.size(); ++i) {
-      int c1 = conj_graph_global[0].count_connected_components();
-      int c2 = new_graph.count_connected_components(); // cambiar a conjunt
-      cout << i << ": " << c1 << " -> " << c2 << endl;
+  const string file_path =
+      "./dades/percolat/" + tipus_conj_global + "_" + percolation_type + ".csv";
+
+  if (std::filesystem::exists(file_path)) {
+    if (!confirm_action("Aquesta operacio sobrescriura " + file_path +
+                        ". Vols continuar?")) {
+      cout << "Operacio cancelada" << endl;
+      return;
     }
+  }
 
-    cout << "done" << endl;
-  } else
-    print_error("cancelat");
+  int q_samples =
+      read_value<int>("Quantitat de valors de q a analitzar (50)", 50);
+  int samples = read_value<int>("Percolacions per cada graph i q (50)", 50);
 
-  // modificar per conj graphs i afegir percolacio
-  // xavier
-  // Graph new_graph = edge_percolation(conj_graph[0],0.7);
-  // cout << "old comp conn ant: " <<
-  // conj_graph[0].count_connected_components()
-  // << endl; cout << "new comp conn ant: " <<
-  // new_graph.count_connected_components() << endl;
+  int total_samples = samples * q_samples * conj_graph_global.size();
+  cout << "Calculant " << total_samples << " graphs percolats" << endl;
+
+  TableFile file(file_path, {"q", "p", "graph", "nodes"});
+
+  for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
+    float q = float(q_sample_index) / float(q_samples - 1);
+
+    for (int i = 0; i < conj_graph_global.size(); ++i) {
+      const Graph &graph = conj_graph_global[i];
+      float p;
+      if (node_percolation)
+        p = node_percolation_probability(graph, q, samples);
+      else
+        p = edge_percolation_probability(graph, q, samples);
+      file << q << p << i << graph.number_of_nodes();
+    }
+  }
 }
 
 void prova_exportar_dades() {
-  TableFile file("sine_wave", {"x", "sin(x)"});
+  TableFile file("./dades/sine_wave.csv", {"x", "sin(x)"});
   for (float x = 0; x < 30; x += 0.05)
     file << x << sin(x);
 }
