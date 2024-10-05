@@ -1,19 +1,21 @@
 #pragma once
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
+
 using namespace std;
 
 /**
  * # Example
  *
- * TableFile file("sine_wave", {"x", "sin(x)"});
+ * TableFile file("sine_wave.csv", {"x", "sin(x)"});
  * for (float x = 0; x < 30; x += 0.05) {
  *   file << x << sin(x);
  */
 class TableFile {
 public:
-  TableFile(const string &file_name, const vector<string> &titles);
+  TableFile(const filesystem::path &file_path, const vector<string> &titles);
 
   // Add a value to the table
   template <typename T> TableFile &operator<<(T value);
@@ -35,7 +37,7 @@ template <typename T> TableFile &TableFile::operator<<(T value) {
   --columns_left;
 
   if (columns_left > 0) {
-    file << ", ";
+    file << ';';
   } else {
     file << endl;
     columns_left = columns;
