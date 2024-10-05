@@ -64,7 +64,7 @@ Graph edge_percolation(const Graph &graph, float q) {
 float node_percolation_probability(const Graph &graph, float q, int samples) {
   float count = 0;
   for (int i = 0; i < samples; ++i) {
-    if (node_percolation(graph, q).is_connex())
+    if (not node_percolation(graph, q).is_connex())
       ++count;
   }
   return count / float(samples);
@@ -73,7 +73,7 @@ float node_percolation_probability(const Graph &graph, float q, int samples) {
 float edge_percolation_probability(const Graph &graph, float q, int samples) {
   float count = 0;
   for (int i = 0; i < samples; ++i) {
-    if (edge_percolation(graph, q).is_connex())
+    if (not edge_percolation(graph, q).is_connex())
       ++count;
   }
   return count / float(samples);

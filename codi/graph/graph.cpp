@@ -55,7 +55,7 @@ int Graph::count_connected_components() const {
 
 bool Graph::is_connex() const
 {
-  return count_connected_components() == 1;
+  return count_connected_components() <= 1;
 }
 
 

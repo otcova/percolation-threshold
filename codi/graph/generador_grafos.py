@@ -51,6 +51,7 @@ def main():
             user_input = input("Introduce el tipo de generación(r, rg) y los parámetros(num_V, p/r[0..1]): ")
             tipus, num_vertices, prob_radio = user_input.split()    
             num_vertices = int(num_vertices)
+            print(float(math.sqrt(math.log(num_vertices) / (math.pi * num_vertices))))
             prob_radio = float(prob_radio)
             break    
         except ValueError:
