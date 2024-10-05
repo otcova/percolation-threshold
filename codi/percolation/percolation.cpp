@@ -4,6 +4,9 @@
 // Creates a new graph with some deleted nodes.
 // q: probability of a node to be conserved
 Graph node_percolation(const Graph &graph, float q) {
+  if (not graph.is_connex())
+    cout << "el graf percolat no es connex" << endl;
+    
   std::random_device dev;
   std::mt19937 rng(dev());
   std::uniform_int_distribution<std::mt19937::result_type> dist100(0, 100);
