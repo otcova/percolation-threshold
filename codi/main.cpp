@@ -25,7 +25,7 @@ void menu() {
   cout << " 3. Analisis [tipus] graphs" << endl;
   cout << " 4. Print graphs cargats" << endl;
   cout << " 5. Clear data" << endl;
-  cout << " 6. Clear file geometric"  << endl;
+  cout << " 6. Clear file geometric" << endl;
   cout << "... Clear screen" << endl;
 }
 
@@ -231,7 +231,6 @@ void generar_graphs() {
 
 void analisis() {
 
-
   if (conj_graph_global.empty()) {
     cout << "No hi han graphs carregats" << endl;
     cout << "Operacio cancelada" << endl;
@@ -241,7 +240,7 @@ void analisis() {
     if (not g.is_connex())
       cout << "graf a percolat no es connex" << endl;
   if (filesystem::create_directories("./dades/percolat/"))
-        perror("create_directories");
+    perror("create_directories");
 
   string percolation_type =
       choose_option("Tipus de percolacio", {"nodes", "arestes"});
@@ -273,10 +272,15 @@ void analisis() {
   columns_titles.push_back("p_mean");
   TableFile file(file_path, columns_titles);
 
+  int count = 1;
   for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
     float q = float(q_sample_index) / float(q_samples - 1);
     file << q;
     float p_sum = 0.;
+    if (q * 100.f > 10 * count) {
+      cout << "Percentage calculat: " << q * 100.f << "%" << endl;
+      ++count;
+    }
 
     for (int i = 0; i < conj_graph_global.size(); ++i) {
       const Graph &graph = conj_graph_global[i];
@@ -291,6 +295,7 @@ void analisis() {
 
     file << p_sum / float(conj_graph_global.size());
   }
+  cout << "done" << endl;
 }
 
 void prova_exportar_dades() {
