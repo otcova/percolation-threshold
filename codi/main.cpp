@@ -153,7 +153,7 @@ void generar_geometric_graphs() {
 void genera_graelles_graph() {
   // generar graelles graph n * n
   if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
-    for (int n : {10, 50, 100, 200}) {
+    for (int n : {1, 5, 10, 20, 40, 50, 100, 200}) {
       cout << "generant graphs de " << n * n << " nodes..." << endl;
 
       Graph graph(n * n);
@@ -230,6 +230,8 @@ void generar_graphs() {
 }
 
 void analisis() {
+
+
   if (conj_graph_global.empty()) {
     cout << "No hi han graphs carregats" << endl;
     cout << "Operacio cancelada" << endl;
@@ -238,6 +240,8 @@ void analisis() {
   for (const Graph &g : conj_graph_global)
     if (not g.is_connex())
       cout << "graf a percolat no es connex" << endl;
+  if (filesystem::create_directories("./dades/percolat/"))
+        perror("create_directories");
 
   string percolation_type =
       choose_option("Tipus de percolacio", {"nodes", "arestes"});
