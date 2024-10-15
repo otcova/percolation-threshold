@@ -20,12 +20,11 @@ void menu() {
   cout << "-- Menu --" << endl;
   cout << "-1. Exit" << endl;
   cout << " 0. Clear screen" << endl;
-  cout << " 1. Genera i carga [tipus] graphs" << endl;
-  cout << " 2. Cargar [tipus] graphs" << endl;
-  cout << " 3. Analisis [tipus] graphs" << endl;
-  cout << " 4. Print graphs cargats" << endl;
-  cout << " 5. Clear data" << endl;
-  cout << " 6. Clear file geometric" << endl;
+  cout << " 1. Genera i carga grafs" << endl;
+  cout << " 2. Analisis de percolacions" << endl;
+  cout << " 3. Print grafs cargats" << endl;
+  cout << " 4. Clear data" << endl;
+  cout << " 5. Clear file geometric" << endl;
   cout << "... Clear screen" << endl;
 }
 
@@ -67,10 +66,7 @@ bool ask(const string &msg, const string &tipus) {
   if (tipus_conj_global.empty() || tipus == tipus_conj_global)
     return true;
   cout << "Conjunt cargat amb graphs " << tipus_conj_global << endl;
-  cout << msg << " [yes/no]: ";
-  string ok;
-  cin >> ok;
-  return (ok == "yes");
+  return confirm_action(msg);
 }
 
 bool is_connex(const string &path) {
@@ -84,70 +80,60 @@ void cargar_tipus(const string &tipus, const Graph &graph) {
   conj_graph_global.push_back(graph);
 }
 
-void cargar_graph(const string &tipus) {
-  if (find(vtipus.begin(), vtipus.end(), tipus) != vtipus.end()) {
-    cout << "cargant graphs..." << endl;
-    if (ask("Estas segur de sustituir amb graph de tipus " + tipus, tipus)) {
-      string directoryPath = "./dades/" + tipus + "/original";
-      int fileCount = count_file(directoryPath);
-      if (fileCount == 0)
-        print_error("No hay ficheros");
-      else {
-        cout << "cargant " << fileCount << " graphs..."
-             << endl; // sempra carga un graf
-        int start_i, end_i;
-        if (tipus == "geometric") { // Els grafs geometrics estan guardats als
-                                    // fitxers amb cardinalitat 0..999
-          start_i = 0;
-          end_i = 1000;
-        } else { // Els grafs randoms estan guardats als fitxers amb
-                 // cardinalitat 1000..1999
-          start_i = 1000;
-          end_i = 2000;
-        }
-        while (start_i < end_i) {
-          ifstream archivo("./dades/" + tipus + "/original/graph" +
-                           to_string(start_i) + ".edgelist");
-          if (archivo.good()) {
-            Graph graph =
-                read_graph("./dades/" + tipus + "/original/graph" +
-                           to_string(start_i) + ".edgelist"); // cargar el graf0
-            cargar_tipus(tipus, graph);                       // carga un graf
-          } else {
-            if (start_i == 0 || start_i == 1000)
-              cout << "ended with file_num == -1" << endl;
-            else
-              cout << "ended with file_num == " << start_i - 1 << endl;
-            break;
-          }
-          ++start_i;
-        }
-        cout << "done" << endl;
-      }
-    }
-  } else
-    print_error("error format cargar");
-  // modificar per conj graphs
-}
+void cargar_graph_geometric() {
+  string tipus = "geometric";
 
-void cargar_graph() {
-  cout << "Introduce tipus de graf[geo, rand] a cargar: ";
-  string tipus;
-  cin >> tipus;
-  short_cut(tipus);
-  if (find(v_no_cargar.begin(), v_no_cargar.end(), tipus) != v_no_cargar.end())
-    print_error("No es pot cargar aquest tipus");
-  else
-    cargar_graph(tipus);
-  // modificar per conj graphs
+  cout << "cargant graphs..." << endl;
+  if (ask("Estas segur de sustituir amb graph de tipus " + tipus, tipus)) {
+    string directoryPath = "./dades/" + tipus + "/original";
+    int fileCount = count_file(directoryPath);
+    if (fileCount == 0)
+      print_error("No hay ficheros");
+    else {
+      cout << "cargant " << fileCount << " graphs..."
+           << endl; // sempra carga un graf
+
+      int start_i = 0;
+      int end_i = 1000;
+      while (start_i < end_i) {
+        ifstream archivo("./dades/" + tipus + "/original/graph" +
+                         to_string(start_i) + ".edgelist");
+        if (archivo.good()) {
+          Graph graph =
+              read_graph("./dades/" + tipus + "/original/graph" +
+                         to_string(start_i) + ".edgelist"); // cargar el graf0
+          cargar_tipus(tipus, graph);                       // carga un graf
+        } else {
+          if (start_i == 0 || start_i == 1000)
+            cout << "ended with file_num == -1" << endl;
+          else
+            cout << "ended with file_num == " << start_i - 1 << endl;
+          break;
+        }
+        ++start_i;
+      }
+      cout << "done" << endl;
+    }
+  }
 }
 
 void generar_geometric_graphs() {
-  cout << "generant graphs..." << endl;
+  bool graf_files_found =
+      filesystem::exists("./dades/geometric/original/graph0.edgelist");
+  bool generate_new_grafs = true;
 
-  system("python3 ./codi/graph/generador_grafos.py ");
-  cout << "done" << endl;
-  cargar_graph("geometric");
+  if (graf_files_found) {
+    generate_new_grafs = not confirm_action(
+        "Vols carregar els grafs geometric guardats en fitxers enlloc "
+        "de generar de nous?");
+  }
+
+  if (generate_new_grafs) {
+    system("python3 ./codi/graph/generador_grafos.py ");
+    cout << "done" << endl;
+  }
+
+  cargar_graph_geometric();
 }
 
 void genera_graelles_graph() {
@@ -213,18 +199,19 @@ void genera_triangular_graph() {
 }
 
 void generar_graphs() {
-  cout << "Introduce tipus de graf[gra, geo, tri, rand] a generar: ";
+  cout << "Introduce tipus de graf a generar";
+  cout << "(GRaella, GEometric, Triangular): ";
+
   string tipus;
   cin >> tipus;
+  tipus = to_lowercase(tipus);
 
-  if (tipus == "gra")
+  if (starts_with(tipus, "gr"))
     genera_graelles_graph();
-  else if (tipus == "geo")
+  else if (starts_with(tipus, "ge"))
     generar_geometric_graphs();
-  else if (tipus == "tri")
+  else if (starts_with(tipus, "t"))
     genera_triangular_graph();
-  else if (tipus == "rand")
-    generar_geometric_graphs();
   else
     print_error("error format generar");
 }
@@ -372,14 +359,12 @@ int main() {
     else if (option == 1)
       generar_graphs();
     else if (option == 2)
-      cargar_graph();
-    else if (option == 3)
       analisis();
-    else if (option == 4)
+    else if (option == 3)
       print_conj_graph();
-    else if (option == 5)
+    else if (option == 4)
       clear_data();
-    else if (option == 6) {
+    else if (option == 5) {
       if (filesystem::remove_all("./dades/geometric/original"))
         perror("remove_all");
       if (filesystem::create_directories("./dades/geometric/original"))
