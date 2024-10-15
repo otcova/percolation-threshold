@@ -153,7 +153,7 @@ void generar_geometric_graphs() {
 void genera_graelles_graph() {
   // generar graelles graph n * n
   if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
-    for (int n : {1, 5, 10, 20, 40, 50, 100, 200}) {
+    for (int n : {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 40, 50, 100, 200, 400, 500, 600, 800, 1000}) {
       cout << "generant graphs de " << n * n << " nodes..." << endl;
 
       Graph graph(n * n);
@@ -170,7 +170,7 @@ void genera_graelles_graph() {
       cout << "done" << endl;
       cout << "cargant " << 1 << " graphs..." << endl;
       cargar_tipus("graelles", graph);
-      cout << "done" << endl;
+      cout << "done" << endl;      
     }
   } else
     print_error("cancelat");
