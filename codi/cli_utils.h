@@ -7,6 +7,18 @@
 
 using namespace std;
 
+inline bool starts_with(const string &text, const string &prefix) {
+  if (text.size() < prefix.size())
+    return false;
+
+  for (int i = 0; i < prefix.size(); ++i) {
+    if (text[i] != prefix[i])
+      return false;
+  }
+
+  return true;
+}
+
 inline string to_uppercase(string text) {
   transform(text.begin(), text.end(), text.begin(), ::toupper);
   return text;
@@ -16,7 +28,8 @@ inline string to_lowercase(string text) {
   return text;
 }
 
-template <typename T> T read_value(const string &prompt, optional<T> default_value = {}) {
+template <typename T>
+T read_value(const string &prompt, optional<T> default_value = {}) {
   // Ignore all text written before the prompt
   cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -42,7 +55,8 @@ template <typename T> T read_value(const string &prompt, optional<T> default_val
   return read_value<T>(prompt, default_value);
 }
 
-inline string choose_option(const string &prompt, const vector<string> &options) {
+inline string choose_option(const string &prompt,
+                            const vector<string> &options) {
   string complete_prompt = prompt + " (" + to_uppercase(options[0]);
   for (int i = 1; i < options.size(); ++i)
     complete_prompt += "/" + to_lowercase(options[i]);
@@ -67,5 +81,5 @@ inline string choose_option(const string &prompt, const vector<string> &options)
 }
 
 inline bool confirm_action(const string &prompt) {
-  return choose_option(prompt, {"yes", "no"}) == "yes";
+  return choose_option(prompt, {"si", "no"}) == "si";
 }
