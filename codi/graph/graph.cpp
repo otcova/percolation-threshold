@@ -6,9 +6,13 @@ using namespace std;
 
 Graph::Graph(int nodes) : connections(nodes) {}
 
-int Graph::number_of_nodes() const { return connections.size(); }
+int Graph::number_of_nodes() const {
+  return connections.size();
+}
 
-vector<int> Graph::adjacent_nodes(int node) const { return connections[node]; }
+const vector<int> &Graph::adjacent_nodes(int node) const {
+  return connections[node];
+}
 
 void Graph::add_edge(int node_a, int node_b) {
   int node_max = max(node_a, node_b);
@@ -53,11 +57,9 @@ int Graph::count_connected_components() const {
   return connected_components;
 }
 
-bool Graph::is_connex() const
-{
+bool Graph::is_connex() const {
   return count_connected_components() <= 1;
 }
-
 
 Graph read_graph(const string &path) {
   Graph graph;

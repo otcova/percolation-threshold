@@ -1,13 +1,13 @@
-#include "cli_utils.h"
+#include "analisis.h"
 #include "export/csv.h"
 #include "graph/graph.h"
-#include "percolation/percolation.h"
-#include <algorithm>
+#include "utils/cli_utils.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <math.h>
+using namespace std::chrono;
 using namespace std;
 
 string tipus_conj_global;
@@ -139,7 +139,8 @@ void generar_geometric_graphs() {
 void genera_graelles_graph() {
   // generar graelles graph n * n
   if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
-    for (int n : {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 40, 50, 100, 200, 400, 500, 600, 800, 1000}) {
+    for (int n : {1,  2,  3,  4,   5,   6,   7,   8,   9,   10,
+                  20, 40, 50, 100, 200, 400, 500, 600, 800, 1000}) {
       cout << "generant graphs de " << n * n << " nodes..." << endl;
 
       Graph graph(n * n);
@@ -156,7 +157,7 @@ void genera_graelles_graph() {
       cout << "done" << endl;
       cout << "cargant " << 1 << " graphs..." << endl;
       cargar_tipus("graelles", graph);
-      cout << "done" << endl;      
+      cout << "done" << endl;
     }
   } else
     print_error("cancelat");
@@ -216,116 +217,6 @@ void generar_graphs() {
     print_error("error format generar");
 }
 
-void analisis() {
-
-  //// Analisis Prompt ////
-
-  if (conj_graph_global.empty()) {
-    cout << "No hi han graphs carregats" << endl;
-    cout << "Operacio cancelada" << endl;
-    return;
-  }
-  for (const Graph &g : conj_graph_global)
-    if (not g.is_connex())
-      cout << "graf a percolat no es connex" << endl;
-  if (filesystem::create_directories("./dades/percolat/"))
-    perror("create_directories");
-
-  string percolation_type =
-      choose_option("Tipus de percolacio", {"nodes", "arestes"});
-  bool node_percolation = percolation_type == "nodes";
-
-  string file_path =
-      "./dades/percolat/" + tipus_conj_global + "_" + percolation_type + ".csv";
-
-  if (filesystem::exists(file_path)) {
-    if (!confirm_action("Aquesta operacio sobrescriura " + file_path +
-                        ". Vols continuar?")) {
-      cout << "Operacio cancelada" << endl;
-      return;
-    }
-  }
-
-  int q_samples =
-      read_value<int>("Quantitat de valors de q a analitzar (50)", 50);
-  int samples = read_value<int>("Percolacions per cada graph i q (200)", 200);
-
-  int total_samples = samples * q_samples * conj_graph_global.size();
-  cout << "Calculant " << total_samples << " graphs percolats" << endl;
-
-  //// Setup Analisis Output File ////
-
-  vector<string> columns_titles = {"q"};
-  for (int i = 0; i < conj_graph_global.size(); ++i) {
-    int nodes = conj_graph_global[i].number_of_nodes();
-    columns_titles.push_back("p" + to_string(i) + "_n" + to_string(nodes));
-  }
-  columns_titles.push_back("p_mean");
-  TableFile file(file_path, columns_titles);
-
-  vector<float> phase_transition_start_q(conj_graph_global.size(), 0.);
-  vector<float> phase_transition_end_q(conj_graph_global.size(), 1.);
-
-  //// Generate Percolations ////
-
-  int count = 1;
-  for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
-    float q = float(q_sample_index) / float(q_samples - 1);
-    file << q;
-    float p_sum = 0.;
-    if (q * 100.f > 10 * count) {
-      cout << "Percentage calculat: " << q * 100.f << "%" << endl;
-      ++count;
-    }
-
-    // Graph transition phase probability
-    for (int i = 0; i < conj_graph_global.size(); ++i) {
-      const Graph &graph = conj_graph_global[i];
-      float p;
-      if (node_percolation)
-        p = node_percolation_probability(graph, q, samples);
-      else
-        p = edge_percolation_probability(graph, q, samples);
-      p_sum += p;
-      file << p;
-
-      // Calculate phase transition q
-      if (p == 0.)
-        phase_transition_start_q[i] = q;
-      else if (p < 1.)
-        phase_transition_end_q[i] = q;
-    }
-
-    // Mean transition phase probability
-    file << p_sum / float(conj_graph_global.size());
-  }
-
-  //// Output Percolation transition phase ////
-  string transition_file_path = "./dades/percolat/" + tipus_conj_global + "_" +
-                                percolation_type + "_transition.csv";
-
-  TableFile transition_file(transition_file_path,
-                            {"graph", "nodes", "start q", "mean q", "end q"});
-
-  { // Take into acount all graphs
-    float start_q = *std::min_element(phase_transition_start_q.begin(),
-                                      phase_transition_start_q.end());
-    float end_q = *std::max_element(phase_transition_end_q.begin(),
-                                    phase_transition_end_q.end());
-    transition_file << "All" << "-" << start_q << (start_q + end_q) / 2
-                    << end_q;
-  }
-
-  for (int i = 0; i < conj_graph_global.size(); ++i) {
-    int nodes = conj_graph_global[i].number_of_nodes();
-    float start_q = phase_transition_start_q[i];
-    float end_q = phase_transition_end_q[i];
-    transition_file << i << nodes << start_q << (start_q + end_q) / 2 << end_q;
-  }
-
-  cout << "done" << endl;
-}
-
 void prova_exportar_dades() {
   TableFile file("./dades/sine_wave.csv", {"x", "sin(x)"});
   for (float x = 0; x < 30; x += 0.05)
@@ -359,7 +250,7 @@ int main() {
     else if (option == 1)
       generar_graphs();
     else if (option == 2)
-      analisis();
+      analisis(conj_graph_global, tipus_conj_global);
     else if (option == 3)
       print_conj_graph();
     else if (option == 4)
