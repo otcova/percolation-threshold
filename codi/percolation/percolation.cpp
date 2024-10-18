@@ -78,8 +78,9 @@ float fast_node_percolation(const Graph &graph, float q, int samples) {
   for (int sample_index = 1; sample_index <= samples; ++sample_index) {
     int connected_components = 0;
 
-    int visited_count = 0;
     int deleted_nodes = 0;
+    int visited_count = 1;
+    visited[0] = sample_index;
     nodes_to_visit.push_back(0);
 
     while (not nodes_to_visit.empty()) {
@@ -123,7 +124,8 @@ float fast_edge_percolation(const Graph &graph, float q, int samples) {
   for (int sample_index = 1; sample_index <= samples; ++sample_index) {
     int connected_components = 0;
 
-    int visited_count = 0;
+    int visited_count = 1;
+    visited[0] = sample_index;
     nodes_to_visit.push_back(0);
 
     while (not nodes_to_visit.empty()) {
