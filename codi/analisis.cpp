@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <atomic>
 #include <filesystem>
-#include <future>
 #include <iostream>
 #include <math.h>
+#include <thread>
 #include <vector>
+
+using namespace std;
 
 enum PercolationType {
   Node,
@@ -16,9 +18,8 @@ enum PercolationType {
 };
 
 struct Analisis {
-  vector<future<void>> threads;
-  static constexpr int rows_per_thread = 4;
-  atomic_int completed_cells = 0;
+  vector<thread> threads;
+  atomic_int rows_todo;
 
   const vector<Graph> &graphs;
   const string &graph_type;
@@ -39,77 +40,57 @@ struct Analisis {
 
     probability_table.resize(graphs.size() * q_samples);
 
-    completed_cells = 0;
-    threads.resize((q_samples / rows_per_thread) + 1);
+    rows_todo = q_samples;
+    threads.resize(thread::hardware_concurrency());
 
     last_report_time = 0;
     chrono = Chrono();
 
     for (int i = 0; i < threads.size(); ++i)
-      threads[i] = async(&Analisis::thread_task, this, i);
+      threads[i] = thread(&Analisis::thread_runtime, this, false);
 
-    while (!threads.empty()) {
-      if (threads.back().wait_for(chrono::seconds(3)) == future_status::ready)
-        threads.pop_back();
+    thread_runtime(true);
 
-      print_progress();
-    }
+    for (int i = 0; i < threads.size(); ++i)
+      threads[i].join();
 
     float total_time = round(100 * chrono.seconds()) / 100;
     cout << "Analisis done in " << total_time << "s" << endl;
-
-    print_progress();
   }
 
-  float &probability_cell(int q_sample, int graph) {
+  float &probability_cell(int row, int graph) {
     const int columns = graphs.size();
-    return probability_table[q_sample * columns + graph];
+    return probability_table[row * columns + graph];
   }
 
-  void calculate_cell(int q_sample_index, int graph_index) {
-    float q = float(q_sample_index) / float(q_samples - 1);
+private:
+  void calculate_cell(int row, int graph_index) {
+    float q = float(row) / float(q_samples - 1);
     float p;
     if (percolation_type == Node)
       p = node_percolation_probability(graphs[graph_index], q, samples);
     else
       p = edge_percolation_probability(graphs[graph_index], q, samples);
 
-    probability_cell(q_sample_index, graph_index) = p;
-    ++completed_cells;
+    probability_cell(row, graph_index) = p;
   }
 
-private:
-  void calculate_row(int q_sample_index) {
-    for (int i = 0; i < graphs.size(); ++i)
-      calculate_cell(q_sample_index, i);
+  void calculate_row(int row) {
+    for (int graph = 0; graph < graphs.size(); ++graph)
+      calculate_cell(row, graph);
   }
 
-  void thread_task(int task_index) {
-    if (task_index == q_samples / rows_per_thread) {
-      int q_sample = task_index * rows_per_thread;
-      for (int i = 0; i < q_samples % rows_per_thread; ++i)
-        calculate_row(q_sample + i);
-    } else {
-      // This wierd execution order is to improve the progress estimation
-      for (int i = 0; i < rows_per_thread; ++i)
-        calculate_row(task_index + i * q_samples / rows_per_thread);
-    }
-  }
+  void thread_runtime(bool print_progress) {
+    int row = --rows_todo;
+    while (row >= 0) {
+      calculate_row(row);
 
-  void print_progress() {
-    if (chrono.seconds() - last_report_time > 2.) {
-      last_report_time = chrono.seconds();
+      row = --rows_todo;
 
-      int total_work = probability_table.size();
-      int work_done = completed_cells;
-      float progress = float(work_done) / float(total_work);
-
-      int expected_time = chrono.seconds() / progress;
-      int time = int(chrono.seconds());
-
-      if (time < expected_time) {
-        cout << "Progress: " << int(100 * progress) << "%   ";
-        cout << time << "s / ~" << expected_time << "s" << endl;
+      if (print_progress) {
+        int progress = int(100 * (q_samples - row) / q_samples);
+        if (progress < 70)
+          cout << "Rows: " << progress << "%" << endl;
       }
     }
   }
