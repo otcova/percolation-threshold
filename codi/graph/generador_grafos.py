@@ -8,13 +8,15 @@ num_file = 0
 
 def generar_grafo(num_vertices, radio):
     global num_file
-    G = nx.random_geometric_graph(num_vertices, radio)
 
-    if not nx.is_connected(G):
-        print("error", num_vertices, radio)
-        return
-    nx.write_edgelist(G, "./dades/geometric/original/graph"+ str(num_file) + ".edgelist", data=False)
-    num_file += 1
+    for _ in range(100):
+        G = nx.random_geometric_graph(num_vertices, radio)
+        if nx.is_connected(G):
+            nx.write_edgelist(G, "./dades/geometric/original/graph"+ str(num_file) + ".edgelist", data=False)
+            num_file += 1
+            return
+    print("error", num_vertices, radio)
+    return
 
 def calcular_radio_critico(num_vertices):
     # Fórmula del radio crítico para garantizar conexidad
