@@ -1,4 +1,5 @@
 #include "export/csv.h"
+#include "graph/graph.h"
 #include "percolation/percolation.h"
 #include "utils/chrono.h"
 #include "utils/cli_utils.h"
@@ -32,7 +33,8 @@ struct Analisis {
   PercolationType percolation_type;
 
   Chrono chrono;
-  atomic<float> last_report_time = 0;
+  atomic<float> last_report_time;
+  atomic<int> last_progress_report;
 
   void run_analisis() {
     unsigned long total_nodes = 0;
@@ -46,6 +48,7 @@ struct Analisis {
     threads.resize(thread::hardware_concurrency());
 
     last_report_time = 0;
+    last_progress_report = 0;
     chrono = Chrono();
 
     for (int i = 0; i < threads.size(); ++i)
@@ -85,9 +88,10 @@ private:
   void thread_runtime() {
     int row = --rows_todo;
     while (row >= 0) {
+      report_progress(row);
+
       calculate_row(row);
       row = --rows_todo;
-      report_progress(row);
     }
     report_progress(0);
   }
@@ -101,7 +105,11 @@ private:
 
     float progress = float(q_samples - row) / float(q_samples);
     progress = sqrt(progress); // Progress estimation
-    cout << "Progress: " << min(98, int(100 * progress)) << "%" << endl;
+    int progress_report = min(93, int(100 * progress));
+    if (progress_report > last_progress_report) {
+      last_progress_report = progress_report;
+      cout << "Progress: " << progress_report << "%" << endl;
+    }
   }
 };
 
@@ -122,15 +130,11 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
   string percolation_type =
       choose_option("Tipus de percolacio", {"nodes", "arestes"});
 
-  string probability_file_path =
+  string file_path =
       "./dades/percolat/" + graph_type + "_" + percolation_type + ".csv";
-  string transition_file_path = "./dades/percolat/" + graph_type + "_" +
-                                percolation_type + "_transition.csv";
 
-  if (filesystem::exists(probability_file_path) ||
-      filesystem::exists(transition_file_path)) {
-    if (!confirm_action("Aquesta operacio sobrescriura:\n  " +
-                        probability_file_path + "\n  " + transition_file_path +
+  if (filesystem::exists(file_path)) {
+    if (!confirm_action("Aquesta operacio sobrescriura:\n  " + file_path +
                         "\nVols continuar?")) {
       cout << "Operacio cancelada" << endl;
       return;
@@ -151,59 +155,88 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
   };
   analisis.run_analisis();
 
-  /// Output: Write probability to file ///
-  vector<string> probability_columns = {"q"};
-  for (int i = 0; i < graphs.size(); ++i) {
-    string nodes = to_string(graphs[i].number_of_nodes());
-    probability_columns.push_back("p" + to_string(i) + "_n" + nodes);
-  }
-  probability_columns.push_back("p_mean");
-  TableFile probability_file(probability_file_path, probability_columns);
+  /// Find the phase transition ///
+  vector<pair<float, float>> phase_transition(graphs.size(), {0, 0});
+  float phase_transition_min_start = 1.;
+  float phase_transition_max_end = 0.;
 
-  for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
-    float q = float(q_sample_index) / float(q_samples - 1);
-    probability_file << q;
-
-    float p_sum = 0.;
-
-    for (int graph_index = 0; graph_index < graphs.size(); ++graph_index) {
-      float p = analisis.probability_cell(q_sample_index, graph_index);
-      probability_file << p;
-      p_sum += p;
-    }
-
-    probability_file << (p_sum / graphs.size());
-  }
-
-  //// Output: Write Percolation transition phase ////
-  TableFile transition_file(transition_file_path,
-                            {"graph", "nodes", "start q", "mean q", "end q"});
-  float min_start_q = 1.;
-  float max_end_q = 0.;
+  bool mean_the_phase_transition = graphs.size() > 1;
+  for (const Graph graph : graphs)
+    if (graph.number_of_nodes() != graphs[0].number_of_nodes())
+      mean_the_phase_transition = false;
 
   for (int graph_index = 0; graph_index < graphs.size(); ++graph_index) {
     float start_q = 0.;
     float end_q = 1.;
 
-    for (int q_sample_index = 0; q_sample_index < q_samples; ++q_sample_index) {
-      float q = float(q_sample_index) / float(q_samples - 1);
-      float p = analisis.probability_cell(q_sample_index, graph_index);
-      if (p == 0) {
+    for (int row = 0; row < q_samples; ++row) {
+      float q = float(row) / float(q_samples - 1);
+      float p = analisis.probability_cell(row, graph_index);
+      if (p == 0)
         start_q = q;
-      } else if (p == 1) {
-        end_q = q;
-        break;
-      }
     }
 
-    min_start_q = min(min_start_q, start_q);
-    max_end_q = max(max_end_q, end_q);
-    int nodes = graphs[graph_index].number_of_nodes();
-    transition_file << graph_index << nodes;
+    for (int row = q_samples - 1; row >= 0; --row) {
+      float q = float(row) / float(q_samples - 1);
+      float p = analisis.probability_cell(row, graph_index);
+      if (p == 1)
+        end_q = q;
+      else
+        break;
+    }
 
-    transition_file << start_q << (start_q + end_q) / 2 << end_q;
+    phase_transition_min_start = min(phase_transition_min_start, start_q);
+    phase_transition_max_end = max(phase_transition_max_end, end_q);
+
+    phase_transition[graph_index].first = start_q;
+    phase_transition[graph_index].second = end_q;
   }
 
-  transition_file << "All" << "-" << min_start_q
-                  << (min_start_q + max_end_q) / 2 << max_end_q;
+  /// Output: Write to csv file ///
+  vector<string> columns = {"q"};
+  for (int i = 0; i < graphs.size(); ++i) {
+    string nodes = to_string(graphs[i].number_of_nodes());
+    columns.push_back("p" + to_string(i) + "_n" + nodes);
+  }
+  columns.push_back("p_mean");
+
+  columns.push_back(""); // Table separation
+  columns.push_back("graph");
+  columns.push_back("nodes");
+  columns.push_back("start_q");
+  columns.push_back("mean_q");
+  columns.push_back("end_q");
+
+  TableFile table(file_path, columns);
+
+  for (int row = 0; row < q_samples; ++row) {
+    float q = float(row) / float(q_samples - 1);
+    table << q;
+
+    float p_sum = 0.;
+
+    for (int graph_index = 0; graph_index < graphs.size(); ++graph_index) {
+      float p = analisis.probability_cell(row, graph_index);
+      table << p;
+      p_sum += p;
+    }
+    table << (p_sum / graphs.size());
+
+    table << ""; // Table separation
+    if (row < graphs.size()) {
+      table << row << graphs[row].number_of_nodes();
+
+      float start = phase_transition[row].first;
+      float end = phase_transition[row].second;
+      float mean = (start + end) / 2;
+      table << start << mean << end;
+    } else if (row == graphs.size() && mean_the_phase_transition) {
+      float start = phase_transition_min_start;
+      float end = phase_transition_max_end;
+      float mean = (start + end) / 2;
+      table << "All" << "-" << start << mean << end;
+    } else {
+      table << "" << "" << "" << "" << "";
+    }
+  }
 }
