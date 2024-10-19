@@ -157,7 +157,7 @@ float fast_edge_percolation(const Graph &graph, float q, int samples) {
       }
     }
 
-    if (visited_count == graph.number_of_nodes())
+    if (visited_count >= graph.number_of_nodes())
       ++connex_count;
   }
 
