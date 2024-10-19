@@ -17,8 +17,8 @@ void menu() {
   cout << "-- Menu --" << endl;
   cout << "-1. Exit" << endl;
   cout << " 0. Clear screen" << endl;
-  cout << " 1. Genera i carga grafs" << endl;
-  cout << " 2. Analisis de percolacions" << endl;
+  cout << " 1. Generar i carregar grafs" << endl;
+  cout << " 2. Anàlisi de percolacions" << endl;
   cout << " 3. Print grafs cargats" << endl;
   cout << " 4. Clear data" << endl;
   cout << " 5. Clear file geometric" << endl;
