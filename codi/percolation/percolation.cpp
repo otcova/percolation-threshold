@@ -79,9 +79,19 @@ float fast_node_percolation(const Graph &graph, float q, int samples) {
     int connected_components = 0;
 
     int deleted_nodes = 0;
-    int visited_count = 1;
-    visited[0] = sample_index;
-    nodes_to_visit.push_back(0);
+    int visited_count = 0;
+
+    // Get starting node
+    for (int node = 0; node < graph.number_of_nodes(); ++node) {
+      visited[node] = sample_index;
+      if (dist(rng) <= q) { // Check if node should exist
+        nodes_to_visit.push_back(node);
+        ++visited_count;
+        break;
+      } else {
+        ++deleted_nodes;
+      }
+    }
 
     while (not nodes_to_visit.empty()) {
       int node = nodes_to_visit.back();
@@ -100,8 +110,12 @@ float fast_node_percolation(const Graph &graph, float q, int samples) {
       }
     }
 
-    if (visited_count + deleted_nodes == graph.number_of_nodes())
+    int not_visited_nodes =
+        graph.number_of_nodes() - visited_count - deleted_nodes;
+    if (not_visited_nodes == 0)
       ++connex_count;
+    else if (dist(rng) <= pow(1 - q, not_visited_nodes))
+      ++connex_count; // It's connex if the not visited nodes are percolated
   }
 
   return float(connex_count) / float(samples);

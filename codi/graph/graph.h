@@ -24,6 +24,6 @@ private:
 };
 
 Graph read_graph(const string &path);
-Graph new_random_geometric_grap(int nodes, float r);
-Graph new_triangular_graph(int width);
-Graph new_3d_grid_graph(int width);
+
+Graph new_triangular_graph(int alt);
+Graph new_grid_graph(int width);

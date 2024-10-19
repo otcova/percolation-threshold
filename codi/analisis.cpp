@@ -32,11 +32,13 @@ struct Analisis {
   PercolationType percolation_type;
 
   Chrono chrono;
-  float last_report_time = 0;
+  atomic<float> last_report_time = 0;
 
   void run_analisis() {
-    int total_samples = samples * q_samples * graphs.size();
-    cout << "Calculant " << total_samples << " graphs percolats" << endl;
+    unsigned long total_nodes = 0;
+    for (const Graph &graph : graphs)
+      total_nodes += graph.number_of_nodes() * samples * q_samples;
+    cout << "Percolant " << total_nodes << " nodes..." << endl;
 
     probability_table.resize(graphs.size() * q_samples);
 
@@ -47,9 +49,9 @@ struct Analisis {
     chrono = Chrono();
 
     for (int i = 0; i < threads.size(); ++i)
-      threads[i] = thread(&Analisis::thread_runtime, this, false);
+      threads[i] = thread(&Analisis::thread_runtime, this);
 
-    thread_runtime(true);
+    thread_runtime();
 
     for (int i = 0; i < threads.size(); ++i)
       threads[i].join();
@@ -80,19 +82,26 @@ private:
       calculate_cell(row, graph);
   }
 
-  void thread_runtime(bool print_progress) {
+  void thread_runtime() {
     int row = --rows_todo;
     while (row >= 0) {
       calculate_row(row);
-
       row = --rows_todo;
-
-      if (print_progress) {
-        int progress = int(100 * (q_samples - row) / q_samples);
-        if (progress < 70)
-          cout << "Rows: " << progress << "%" << endl;
-      }
+      report_progress(row);
     }
+    report_progress(0);
+  }
+
+  void report_progress(int row) {
+    int now = chrono.seconds();
+    if (now - last_report_time < 5.)
+      return;
+
+    last_report_time = now;
+
+    float progress = float(q_samples - row) / float(q_samples);
+    progress = sqrt(progress); // Progress estimation
+    cout << "Progress: " << min(98, int(100 * progress)) << "%" << endl;
   }
 };
 

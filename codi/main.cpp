@@ -1,13 +1,10 @@
 #include "analisis.h"
-#include "export/csv.h"
 #include "graph/graph.h"
 #include "utils/cli_utils.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <math.h>
-using namespace std::chrono;
 using namespace std;
 
 string tipus_conj_global;
@@ -139,32 +136,17 @@ void generar_geometric_graphs() {
 void genera_graelles_graph() {
   // generar graelles graph n * n
   if (ask("Estas segur de generar i cargar graph de graelles", "graelles")) {
+    cout << "Grafs generats amb nodes:";
     for (int n : {1,  2,  3,  4,   5,   6,   7,   8,   9,   10,
                   20, 40, 50, 100, 200, 400, 500, 600, 800, 1000}) {
-      cout << "generant graphs de " << n * n << " nodes..." << endl;
 
-      Graph graph(n * n);
-      // conectar horitzaontal
-      for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n - 1; ++j)
-          graph.add_edge(n * i + j, n * i + (j + 1));
-      }
-      // conectar vertical
-      for (int j = 0; j < n; ++j) {
-        for (int i = 0; i < n - 1; ++i)
-          graph.add_edge(n * i + j, n * (i + 1) + j);
-      }
-      cout << "done" << endl;
-      cout << "cargant " << 1 << " graphs..." << endl;
+      Graph graph = new_grid_graph(n);
+      cout << " " << graph.number_of_nodes();
       cargar_tipus("graelles", graph);
-      cout << "done" << endl;
     }
+    cout << endl;
   } else
     print_error("cancelat");
-}
-
-int get_height(int n) {
-  return (1 + sqrt(1 + 8 * n)) / 2;
 }
 
 void genera_triangular_graph() {
@@ -175,26 +157,9 @@ void genera_triangular_graph() {
     int alt;
     cin >> alt;
 
-    int n = alt * (alt + 1) / 2;
-    cout << "generant graphs de " << n << " nodes..." << endl;
-    Graph graph(n);
-    // graf tiangular
-    // conectar amb dos fills
-    for (int i = 0; i < n - alt; ++i) {
-      int h = get_height(i);
-      graph.add_edge(i, i + h);
-      graph.add_edge(i, i + h + 1);
-    }
-    // conectar gemans
-    for (int i = 1; i < n - 1; ++i) {
-      i += (get_height(i) != get_height(i + 1));
-      graph.add_edge(i, i + 1);
-    }
-
-    cout << "done" << endl;
-    cout << "cargant " << 1 << " graphs..." << endl;
+    Graph graph = new_triangular_graph(alt);
+    cout << "Generat graf de " << graph.number_of_nodes() << " nodes" << endl;
     cargar_tipus("triangular", graph);
-    cout << "done" << endl;
   } else
     print_error("cancelat");
 }
@@ -215,12 +180,6 @@ void generar_graphs() {
     genera_triangular_graph();
   else
     print_error("error format generar");
-}
-
-void prova_exportar_dades() {
-  TableFile file("./dades/sine_wave.csv", {"x", "sin(x)"});
-  for (float x = 0; x < 30; x += 0.05)
-    file << x << sin(x);
 }
 
 void print_conj_graph() {
