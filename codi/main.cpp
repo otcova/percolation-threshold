@@ -14,15 +14,16 @@ const vector<string> v_no_cargar = {"graelles", "triangular"};
 
 void menu() {
   cout << u8"\033[2J\033[1;1H";
-  cout << "-- Menu --" << endl;
-  cout << "-1. Exit" << endl;
-  cout << " 0. Clear screen" << endl;
+  cout << "---------- Menu ------------" << endl;
   cout << " 1. Generar i carregar grafs" << endl;
   cout << " 2. Anàlisi de percolacions" << endl;
-  cout << " 3. Print grafs cargats" << endl;
-  cout << " 4. Clear data" << endl;
-  cout << " 5. Clear file geometric" << endl;
-  cout << "... Clear screen" << endl;
+  cout << "----------------------------" << endl;
+  cout << " 3. Mostrar grafs cargats" << endl;
+  cout << " 4. Eliminar carpeta data" << endl;
+  cout << " 5. Eliminar fitxers de grafs" << endl;
+  cout << " 6. Neteja la terminal" << endl;
+  cout << " *. Exit" << endl;
+  cout << "----------------------------" << endl;
 }
 
 void print_error(const string &text) {
@@ -195,6 +196,13 @@ void print_conj_graph() {
   cout << "done" << endl;
 }
 
+void remove_files_of_graphs() {
+  if (filesystem::remove_all("./dades/geometric/original"))
+    perror("remove_all");
+  if (filesystem::create_directories("./dades/geometric/original"))
+    perror("create_directories");
+}
+
 int main() {
   menu();
   cout << "> ";
@@ -202,11 +210,7 @@ int main() {
   int option;
   while (cin >> option) {
 
-    if (option == -1)
-      break;
-    else if (option == 0)
-      menu();
-    else if (option == 1)
+    if (option == 1)
       generar_graphs();
     else if (option == 2)
       analisis(conj_graph_global, tipus_conj_global);
@@ -214,13 +218,13 @@ int main() {
       print_conj_graph();
     else if (option == 4)
       clear_data();
-    else if (option == 5) {
-      if (filesystem::remove_all("./dades/geometric/original"))
-        perror("remove_all");
-      if (filesystem::create_directories("./dades/geometric/original"))
-        perror("create_directories");
-    } else
+    else if (option == 5)
+      remove_files_of_graphs();
+    else if (option == 6)
       menu();
+    else
+      break;
+
     cout << "> ";
   }
 }
