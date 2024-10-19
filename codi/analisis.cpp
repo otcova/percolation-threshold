@@ -200,7 +200,8 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
   vector<string> columns = {"q"};
   for (int i = 0; i < graphs.size(); ++i) {
     string nodes = to_string(graphs[i].number_of_nodes());
-    columns.push_back("p" + to_string(i) + "_n" + nodes);
+    // columns.push_back("p" + to_string(i) + "_n" + nodes);
+    columns.push_back(nodes);
   }
   columns.push_back("p_mean");
 
