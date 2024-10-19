@@ -18,10 +18,9 @@ void menu() {
   cout << " 1. Generar i carregar grafs" << endl;
   cout << " 2. Anàlisi de percolacions" << endl;
   cout << "----------------------------" << endl;
-  cout << " 3. Mostrar grafs cargats" << endl;
-  cout << " 4. Eliminar carpeta data" << endl;
-  cout << " 5. Eliminar fitxers de grafs" << endl;
-  cout << " 6. Neteja la terminal" << endl;
+  cout << " 3. Mostra els grafs carregats" << endl;
+  cout << " 4. Eliminar grafs carregats" << endl;
+  cout << " 5. Neteja la terminal" << endl;
   cout << " *. Exit" << endl;
   cout << "----------------------------" << endl;
 }
@@ -196,13 +195,6 @@ void print_conj_graph() {
   cout << "done" << endl;
 }
 
-void remove_files_of_graphs() {
-  if (filesystem::remove_all("./dades/geometric/original"))
-    perror("remove_all");
-  if (filesystem::create_directories("./dades/geometric/original"))
-    perror("create_directories");
-}
-
 int main() {
   menu();
   cout << "> ";
@@ -219,8 +211,6 @@ int main() {
     else if (option == 4)
       clear_data();
     else if (option == 5)
-      remove_files_of_graphs();
-    else if (option == 6)
       menu();
     else
       break;
