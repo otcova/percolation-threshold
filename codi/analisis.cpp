@@ -37,10 +37,14 @@ struct Analisis {
   atomic<int> last_progress_report;
 
   void run_analisis() {
-    unsigned long total_nodes = 0;
+
+    unsigned long long percolations = samples * q_samples * graphs.size();
+    unsigned long long total_nodes = 0;
     for (const Graph &graph : graphs)
-      total_nodes += graph.number_of_nodes() * samples * q_samples;
-    cout << "Percolant " << total_nodes << " nodes..." << endl;
+      total_nodes += graph.number_of_nodes();
+    cout << "Analitzant: ";
+    cout << percolations << " percolacions i ";
+    cout << total_nodes * samples * q_samples << " nodes" << endl;
 
     probability_table.resize(graphs.size() * q_samples);
 
