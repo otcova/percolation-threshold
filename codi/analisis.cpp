@@ -138,7 +138,7 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
   }
 
   int q_samples =
-      read_value<int>("Quantitat de valors de q a analitzar (101)", 101);
+      read_value<int>("Quantitat de valors de q a analitzar (51)", 51);
   int samples = read_value<int>("Percolacions per cada graph i q (200)", 200);
 
   /// Run the analisis ///
