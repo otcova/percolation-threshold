@@ -190,7 +190,10 @@ void print_conj_graph() {
   for (const Graph &graph : conj_graph_global) {
     cout << graph.number_of_nodes() << " ";
     if (graph.number_of_nodes() < 10)
+    {
       graph.print_graph();
+      cout << endl;
+    }
   }
 
   cout << (conj_graph_global.empty() ? "nothing here" : "") << endl;
