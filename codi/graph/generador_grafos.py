@@ -66,8 +66,8 @@ def main():
     #     print("[WARN] Cambiando radio", radio, "por", radio_critico)
    # for i in range(ini, ini+n_gen):
     #     generar_grafo(num_vertices, radio, i)
-    for nv in [1, 10, 50, 100, 500, 1000]:
-        rc = [0.2]   
+    for nv in [5, 10, 50, 100, 500, 1000]:
+        rc = [0.01]   
         print(nv)
         for r in rc:
             generar_grafo(nv, r)
