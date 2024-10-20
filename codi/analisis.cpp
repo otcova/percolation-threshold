@@ -213,6 +213,7 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
   columns.push_back("end_q");
 
   TableFile table(file_path, columns);
+  cout << "Exportant dades en: " << file_path << endl;
 
   for (int row = 0; row < q_samples; ++row) {
     float q = float(row) / float(q_samples - 1);
