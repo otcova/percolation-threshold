@@ -155,7 +155,7 @@ void genera_triangular_graph() {
     // generar graelles graph n * n
     cout << "Introduce altura[1..] para un grafo triangular de h altura: ";
     for (int alt : {1,  2,  3,   4,   5,   6,   7,   8,   9,    10,  20,
-                  40, 50, 100, 200, 400, 500, 600, 800, 1000, 1414}) {
+                    40, 50, 100, 200, 400, 500, 600, 800, 1000, 1414}) {
 
       Graph graph = new_triangular_graph(alt);
       cout << "Generat graf de " << graph.number_of_nodes() << " nodes" << endl;
@@ -188,9 +188,8 @@ void print_conj_graph() {
   cout << "Printeant el nombre de nodes de " << conj_graph_global.size()
        << " graphs " << tipus_conj_global << " cargats..." << endl;
   for (const Graph &graph : conj_graph_global) {
-    cout << graph.number_of_nodes() << " ";
-    if (graph.number_of_nodes() < 10)
-    {
+    cout << endl << "n = " << graph.number_of_nodes() << "; ";
+    if (graph.number_of_nodes() < 10) {
       graph.print_graph();
       cout << endl;
     }

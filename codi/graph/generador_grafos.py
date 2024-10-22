@@ -8,7 +8,7 @@ num_file = 0
 def generar_grafo(num_vertices, radio):
     global num_file
 
-    for _ in range(1000):
+    for _ in range(10000):
         G = nx.random_geometric_graph(num_vertices, radio)
         if nx.is_connected(G):
             nx.write_edgelist(G, "./dades/geometric/original/graph"+ str(num_file) + ".edgelist", data=False)
@@ -56,7 +56,7 @@ def main():
     radi = read_value(float, "Parametra Radi: ")
 
     print("Generant grafs amb nodes: ", end='', flush=True)
-    for nv in [5, 10, 50, 100, 500, 1000]:
+    for nv in [5, 10, 20, 30, 40, 50, 75, 100, 200, 300, 400, 500, 750, 1000]:
         print(nv, end=' ', flush=True)
         generar_grafo(nv, radi)
 

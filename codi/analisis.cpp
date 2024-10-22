@@ -147,7 +147,8 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
 
   int q_samples =
       read_value<int>("Quantitat de valors de q a analitzar (51)", 51);
-  int samples = read_value<int>("Percolacions per cada graph i q (10000)", 10000);
+  int samples =
+      read_value<int>("Percolacions per cada graph i q (10000)", 10000);
 
   /// Run the analisis ///
   Analisis analisis = {
@@ -176,14 +177,14 @@ void analisis(const vector<Graph> &graphs, const string &graph_type) {
     for (int row = 0; row < q_samples; ++row) {
       float q = float(row) / float(q_samples - 1);
       float p = analisis.probability_cell(row, graph_index);
-      if (p == 0)
+      if (p <= 0.001)
         start_q = q;
     }
 
     for (int row = q_samples - 1; row >= 0; --row) {
       float q = float(row) / float(q_samples - 1);
       float p = analisis.probability_cell(row, graph_index);
-      if (p == 1)
+      if (p >= 0.999 && q >= start_q)
         end_q = q;
       else
         break;
